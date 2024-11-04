@@ -1,0 +1,1 @@
+email_address = "<your-email@example.com>" # ここにメールアドレスを入れる（"your-email@example.com"）
