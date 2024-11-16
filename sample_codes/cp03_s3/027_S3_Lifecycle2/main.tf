@@ -10,7 +10,7 @@ variable "aws_profile_name" {
 }
 
 variable "bucket_name" {
-  type = string # teraform.tfvarsで規定
+  type = string # terraform.tfvarsで規定
 }
 
 provider "aws" {

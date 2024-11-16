@@ -1,0 +1,42 @@
+{
+  "Comment": "A Step Functions state machine that generates a random number and routes based on its value.",
+  "StartAt": "InvokeRandomGenerator",
+  "States": {
+    "InvokeRandomGenerator": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${random_generator_lambda_arn}"
+      },
+      "ResultPath": "$.randomResult",
+      "Next": "CheckResult"
+    },
+    "CheckResult": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.randomResult.Payload.number",
+          "NumericGreaterThanEquals": 8,
+          "Next": "WinState"
+        }
+      ],
+      "Default": "LoseState"
+    },
+    "WinState": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${win_lambda_arn}"
+      },
+      "End": true
+    },
+    "LoseState": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${lose_lambda_arn}"
+      },
+      "End": true
+    }
+  }
+}

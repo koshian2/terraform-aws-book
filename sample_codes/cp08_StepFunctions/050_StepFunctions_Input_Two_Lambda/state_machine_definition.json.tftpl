@@ -1,0 +1,31 @@
+{
+  "Comment": "A Step Functions state machine that processes input with two Lambda functions.",
+  "StartAt": "InvokeLambdaOne",
+  "States": {
+    "InvokeLambdaOne": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${lambda_one_arn}",
+        "Payload": {
+          "x.$": "$.x"
+        }
+      },
+      "ResultPath": "$.lambdaOneResult",
+      "Next": "InvokeLambdaTwo"
+    },
+    "InvokeLambdaTwo": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${lambda_two_arn}",
+        "Payload": {
+          "x.$": "$.x",
+          "squared.$": "$.lambdaOneResult.Payload.result"
+        }
+      },
+      "ResultPath": "$.lambdaTwoResult",
+      "End": true
+    }
+  }
+}

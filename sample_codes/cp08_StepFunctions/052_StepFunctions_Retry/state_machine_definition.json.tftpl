@@ -1,0 +1,54 @@
+{
+  "Comment": "State machine triggered by SQS with retry logic and dead-letter queue handling.",
+  "StartAt": "ProcessMessage",
+  "States": {
+    "ProcessMessage": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${processing_lambda_arn}",
+        "Payload": {
+          "message.$": "$"
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error_info",
+          "Next": "SendToDeadLetterQueue"
+        }
+      ],
+      "Next": "OnSuccess"
+    },
+    "OnSuccess": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${success_lambda_arn}",
+        "Payload": {
+          "message.$": "$"
+        }
+      },
+      "End": true
+    },
+    "SendToDeadLetterQueue": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "QueueUrl": "${dlq_queue_url}",
+        "MessageBody": {
+          "Input.$": "$"
+        }
+      },
+      "End": true
+    }
+  }
+}
