@@ -1,9 +1,9 @@
 variable "pet_count_map" {
-  type    = map(number)
+  type = map(number)
   default = {
-    cat   = 2,
-    dog   = 3,
-    mouse = 5
+    cat    = 2,
+    dog    = 3,
+    rabbit = 5
   }
 }
 

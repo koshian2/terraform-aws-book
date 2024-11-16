@@ -1,0 +1,29 @@
+{
+  "Comment": "A Step Functions state machine that sends two SNS messages with a 3-minute wait in between using SNS service integration.",
+  "StartAt": "PublishFirstMessage",
+  "States": {
+    "PublishFirstMessage": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "${sns_topic_arn}",
+        "Message": "3分間待ってやる！"
+      },
+      "Next": "Wait3Minutes"
+    },
+    "Wait3Minutes": {
+      "Type": "Wait",
+      "Seconds": 180,
+      "Next": "PublishSecondMessage"
+    },
+    "PublishSecondMessage": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "${sns_topic_arn}",
+        "Message": "時間だ。答えを聞こう！"
+      },
+      "End": true
+    }
+  }
+}

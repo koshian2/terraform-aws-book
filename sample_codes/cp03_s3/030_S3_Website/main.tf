@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 variable "bucket_name" {
-  type = string # teraform.tfvarsで規定
+  type = string # terraform.tfvarsで規定
 }
 
 locals {

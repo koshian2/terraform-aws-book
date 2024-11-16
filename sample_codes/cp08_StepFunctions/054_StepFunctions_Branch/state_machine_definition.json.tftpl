@@ -1,0 +1,52 @@
+{
+  "Comment": "A Step Functions state machine that invokes two Lambda functions in parallel and merges their results.",
+  "StartAt": "ParallelExecution",
+  "States": {
+    "ParallelExecution": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "InvokeLambdaOne",
+          "States": {
+            "InvokeLambdaOne": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${lambda_hiragana_arn}",
+                "Payload": {
+                  "input.$": "$"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "InvokeLambdaTwo",
+          "States": {
+            "InvokeLambdaTwo": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${lambda_katakana_arn}",
+                "Payload": {
+                  "input.$": "$"
+                }
+              },
+              "End": true
+            }
+          }
+        }
+      ],
+      "ResultPath": "$.ParallelResults",
+      "Next": "MergeResults"
+    },
+    "MergeResults": {
+      "Type": "Pass",
+      "Parameters": {
+        "FinalResult.$": "States.JsonMerge($.ParallelResults[0].Payload, $.ParallelResults[1].Payload, false)"
+      },
+      "End": true
+    }
+  }
+}

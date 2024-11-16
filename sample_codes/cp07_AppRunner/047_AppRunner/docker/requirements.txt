@@ -1,0 +1,6 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+gradio==5.4.0
+torch==2.5.1
+torchvision==0.20.1
+Pillow==11.0.0
+requests==2.32.3

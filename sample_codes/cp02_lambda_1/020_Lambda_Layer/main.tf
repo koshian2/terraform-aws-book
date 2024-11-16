@@ -22,11 +22,11 @@ data "archive_file" "lambda" {
 }
 
 resource "aws_lambda_layer_version" "numpy_layer" {
-  filename         = "./numpy.zip"
-  layer_name       = "numpy_layer"
-  description      = "A layer containing numpy library"
+  filename            = "./numpy.zip"
+  layer_name          = "numpy_layer"
+  description         = "A layer containing numpy library"
   compatible_runtimes = ["python3.12"]
-  source_code_hash = filebase64sha256("./numpy.zip")
+  source_code_hash    = filebase64sha256("./numpy.zip")
 }
 
 resource "aws_lambda_function" "numpy_linear_algebra" {

@@ -1,0 +1,22 @@
+{
+  "Comment": "A simple AWS Step Functions state machine that invokes two Lambda functions in sequence.",
+  "StartAt": "InvokeLambdaOne",
+  "States": {
+    "InvokeLambdaOne": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${lambda_one_arn}"
+      },
+      "Next": "InvokeLambdaTwo"
+    },
+    "InvokeLambdaTwo": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${lambda_two_arn}"
+      },
+      "End": true
+    }
+  }
+}
