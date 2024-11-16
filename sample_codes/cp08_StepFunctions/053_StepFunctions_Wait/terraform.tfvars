@@ -1,1 +1,1 @@
-email_address = "your-email@example.com"
+email_address = "<place-your-email@-example.com>" # 例：your-email@example.com
