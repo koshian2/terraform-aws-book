@@ -40,7 +40,7 @@ resource "aws_s3_object" "object" {
   key          = each.value
   source       = "./html/${each.value}"
   content_type = "text/html"
-  etag         = filemd5("./html/${each.value}")
+  source_hash  = filemd5("./html/${each.value}")
 }
 
 # Webサイトの設定

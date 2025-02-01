@@ -26,6 +26,5 @@ resource "aws_s3_object" "example_object" {
   bucket = aws_s3_bucket.example_bucket.bucket
   key    = "example/sample.txt"
   source = "./sample.txt"
-
-  etag = filemd5("./sample.txt")
+  source_hash = filemd5("./sample.txt")
 }
