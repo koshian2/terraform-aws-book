@@ -1,0 +1,24 @@
+[Unit]
+Description=Gunicorn Flask app (:80 direct bind)
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/app
+Environment="PATH=/opt/app/venv/bin"
+ExecStart=/opt/app/venv/bin/gunicorn -w 6 --threads 1 -b 0.0.0.0:80 app:app
+Restart=always
+
+# 一般ユーザで 1024 未満ポートを開く
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+# 追加の分離（任意）
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

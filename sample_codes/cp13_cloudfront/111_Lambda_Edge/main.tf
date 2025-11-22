@@ -1,0 +1,39 @@
+terraform {
+  backend "local" {
+    path = ".cache/terraform.tfstate"
+  }
+
+  required_version = ">= 1.7.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 6.8.0"
+    }
+    
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.7.2"
+    }
+
+    archive = {
+      source  = "hashicorp/archive"
+      version = ">= 2.7.1"
+    }
+  }  
+}
+
+variable "aws_profile_name" {
+  type    = string
+  default = "develop"
+}
+
+provider "aws" {
+  profile = var.aws_profile_name
+}
+
+provider "aws" {
+  alias   = "us_east_1"
+  region  = "us-east-1"
+  profile = var.aws_profile_name
+}

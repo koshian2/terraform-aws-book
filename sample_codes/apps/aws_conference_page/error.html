@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>エラー | AWS Cloud Conference 2030</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #232f3e;
+            background: linear-gradient(135deg, #232f3e 0%, #3f51b5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .error-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 3rem;
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff9900;
+            margin-bottom: 2rem;
+        }
+
+        .error-icon {
+            font-size: 8rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #232f3e;
+            margin-bottom: 1rem;
+            line-height: 1;
+        }
+
+        .error-title {
+            font-size: 2rem;
+            color: #232f3e;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .error-details {
+            background: #f7f9fc;
+            border-left: 4px solid #ff9900;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .error-details h3 {
+            color: #232f3e;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .error-details ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .error-details li {
+            padding: 0.5rem 0;
+            color: #666;
+        }
+
+        .error-details li:before {
+            content: "✓ ";
+            color: #ff9900;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: #ff9900;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
+        }
+
+        .btn:hover {
+            background: #ec7211;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: #232f3e;
+        }
+
+        .btn-secondary:hover {
+            background: #3f51b5;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #232f3e;
+            border: 2px solid #232f3e;
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: #232f3e;
+            color: white;
+        }
+
+        .search-box {
+            margin: 2rem 0;
+            display: flex;
+            gap: 0.5rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: #ff9900;
+        }
+
+        .search-box button {
+            padding: 1rem 2rem;
+            background: #ff9900;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #ec7211;
+        }
+
+        .helpful-links {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        .helpful-links h3 {
+            color: #232f3e;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .link-card {
+            padding: 1rem;
+            background: #f7f9fc;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #232f3e;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .link-card:hover {
+            background: #fff;
+            border-color: #ff9900;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .link-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .link-card .title {
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        .link-card .description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .support-info {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #fff9e6;
+            border-radius: 10px;
+            border: 2px solid #ffd966;
+        }
+
+        .support-info h4 {
+            color: #232f3e;
+            margin-bottom: 0.5rem;
+        }
+
+        .support-info p {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .support-info a {
+            color: #ff9900;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .support-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .error-code {
+                font-size: 4rem;
+            }
+
+            .error-title {
+                font-size: 1.5rem;
+            }
+
+            .error-message {
+                font-size: 1rem;
+            }
+
+            .error-icon {
+                font-size: 5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* アニメーション用 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="logo">AWS Cloud Conference 2030</div>
+        
+        <div class="error-icon" id="errorIcon">☁️</div>
+        <div class="error-code" id="errorCode">404</div>
+        <h1 class="error-title" id="errorTitle">ページが見つかりません</h1>
+        <p class="error-message" id="errorMessage">
+            お探しのページは移動または削除された可能性があります。<br>
+            URLを確認するか、以下の方法でお探しの情報を見つけてください。
+        </p>
+
+        <div class="error-details">
+            <h3>💡 よくある原因</h3>
+            <ul>
+                <li>URLが間違っている、または古いリンクを使用している</li>
+                <li>ページが移動または削除された</li>
+                <li>ブックマークが古くなっている</li>
+                <li>一時的なサーバーエラーが発生している</li>
+            </ul>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="お探しの情報を検索...">
+            <button onclick="handleSearch()">検索</button>
+        </div>
+
+        <div class="button-group">
+            <a href="aws-conference.html" class="btn">ホームに戻る</a>
+            <a href="javascript:history.back()" class="btn btn-secondary">前のページに戻る</a>
+            <a href="javascript:location.reload()" class="btn btn-outline">ページを再読み込み</a>
+        </div>
+
+        <div class="helpful-links">
+            <h3>🔗 役立つリンク</h3>
+            <div class="links-grid">
+                <a href="aws-conference.html#features" class="link-card">
+                    <div class="icon">🎯</div>
+                    <div class="title">特徴</div>
+                    <div class="description">カンファレンスの特徴</div>
+                </a>
+                <a href="aws-conference.html#sessions" class="link-card">
+                    <div class="icon">📅</div>
+                    <div class="title">セッション</div>
+                    <div class="description">プログラム一覧</div>
+                </a>
+                <a href="aws-conference.html#venue" class="link-card">
+                    <div class="icon">📍</div>
+                    <div class="title">会場情報</div>
+                    <div class="description">アクセス・地図</div>
+                </a>
+                <a href="aws-conference.html#register" class="link-card">
+                    <div class="icon">✍️</div>
+                    <div class="title">参加登録</div>
+                    <div class="description">今すぐ登録</div>
+                </a>
+            </div>
+        </div>
+
+        <div class="support-info">
+            <h4>📧 お困りですか？</h4>
+            <p>問題が解決しない場合は、サポートチームまでお問い合わせください。</p>
+            <p>
+                メール: <a href="mailto:info@awsconference.jp"><span class="__cf_email__">info@awsconference.jp</span></a><br>
+                電話: <a href="tel:03-1234-5678">03-1234-5678</a>（平日 10:00-18:00）
+            </p>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // URLパラメータからエラータイプを取得
+        function getErrorType() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('type') || '404';
+        }
+
+        // エラータイプに応じて表示を変更
+        function updateErrorDisplay() {
+            const errorType = getErrorType();
+            const errorIcon = document.getElementById('errorIcon');
+            const errorCode = document.getElementById('errorCode');
+            const errorTitle = document.getElementById('errorTitle');
+            const errorMessage = document.getElementById('errorMessage');
+
+            switch(errorType) {
+                case '403':
+                    errorIcon.textContent = '🔒';
+                    errorCode.textContent = '403';
+                    errorTitle.textContent = 'アクセスが拒否されました';
+                    errorMessage.innerHTML = 'このページへのアクセス権限がありません。<br>ログインが必要な場合は、ログインしてから再度お試しください。';
+                    break;
+                
+                case '500':
+                    errorIcon.textContent = '⚠️';
+                    errorCode.textContent = '500';
+                    errorTitle.textContent = 'サーバーエラー';
+                    errorMessage.innerHTML = 'サーバーで問題が発生しました。<br>しばらく時間をおいてから再度お試しください。';
+                    break;
+                
+                case '503':
+                    errorIcon.textContent = '🔧';
+                    errorCode.textContent = '503';
+                    errorTitle.textContent = 'メンテナンス中';
+                    errorMessage.innerHTML = '現在メンテナンス作業中です。<br>ご不便をおかけして申し訳ございません。しばらくお待ちください。';
+                    break;
+                
+                case 'network':
+                    errorIcon.textContent = '📡';
+                    errorCode.textContent = '';
+                    errorTitle.textContent = 'ネットワークエラー';
+                    errorMessage.innerHTML = 'インターネット接続を確認してください。<br>接続が安定してから再度お試しください。';
+                    break;
+                
+                default: // 404
+                    errorIcon.textContent = '☁️';
+                    errorCode.textContent = '404';
+                    errorTitle.textContent = 'ページが見つかりません';
+                    errorMessage.innerHTML = 'お探しのページは移動または削除された可能性があります。<br>URLを確認するか、以下の方法でお探しの情報を見つけてください。';
+            }
+        }
+
+        // 検索処理
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                // 実際のサイトでは検索ページにリダイレクト
+                alert(`"${query}" を検索します。\n\n実際のサイトでは検索結果ページに移動します。`);
+                // window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+            }
+        }
+
+        // Enterキーで検索
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+
+        // ページ読み込み時にエラー表示を更新
+        updateErrorDisplay();
+
+        // ランダムなクラウドアニメーション
+        function animateCloud() {
+            const errorIcon = document.getElementById('errorIcon');
+            const clouds = ['☁️', '⛅', '🌥️'];
+            let index = 0;
+            
+            setInterval(() => {
+                if (getErrorType() === '404') {
+                    index = (index + 1) % clouds.length;
+                    errorIcon.textContent = clouds[index];
+                }
+            }, 3000);
+        }
+
+        animateCloud();
+
+        // エラーログ送信（実装例）
+        function logError() {
+            const errorData = {
+                type: getErrorType(),
+                url: window.location.href,
+                referrer: document.referrer,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            };
+            
+            // 実際のサイトでは、ここでエラーログをサーバーに送信
+            console.log('Error logged:', errorData);
+        }
+
+        logError();
+    </script>
+</body>
+</html>

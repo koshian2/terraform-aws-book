@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cloud Conference 2030 | 日本最大級のクラウドカンファレンス</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #232f3e;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ナビゲーション */
+        nav {
+            background: #232f3e;
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff9900;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #ff9900;
+        }
+
+        /* モバイルメニューボタン */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* ヒーローセクション */
+        .hero {
+            position: relative;
+            height: 600px;
+            background: linear-gradient(135deg, #232f3e 0%, #3f51b5 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            padding: 2rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero-date {
+            font-size: 1.8rem;
+            color: #ff9900;
+            font-weight: bold;
+            margin-bottom: 2rem;
+        }
+
+        /* ボタン */
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: #ff9900;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
+        }
+
+        .btn:hover {
+            background: #ec7211;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #232f3e;
+            margin-left: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: #f0f0f0;
+        }
+
+        /* セクション共通 */
+        section {
+            padding: 5rem 0;
+        }
+
+        section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #232f3e;
+        }
+
+        section .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 3rem;
+        }
+
+        /* 特徴セクション */
+        .features {
+            background: #f7f9fc;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ff9900;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #232f3e;
+        }
+
+        /* セッションセクション */
+        .sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .session-card {
+            background: white;
+            border-left: 5px solid #ff9900;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .session-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transform: translateX(5px);
+        }
+
+        .session-time {
+            color: #ff9900;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .session-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #232f3e;
+        }
+
+        /* 会場セクション */
+        .venue {
+            background: #232f3e;
+            color: white;
+        }
+
+        .venue h2 {
+            color: white;
+        }
+
+        .venue-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            margin-top: 3rem;
+        }
+
+        .venue-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .venue-details {
+            font-size: 1.1rem;
+        }
+
+        .venue-details h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #ff9900;
+        }
+
+        .venue-details p {
+            margin-bottom: 1rem;
+        }
+
+        /* スポンサーセクション */
+        .sponsors {
+            background: #f7f9fc;
+        }
+
+        .sponsors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .sponsor-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #666;
+        }
+
+        /* 登録セクション */
+        .register {
+            background: linear-gradient(135deg, #3f51b5 0%, #232f3e 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .register h2 {
+            color: white;
+        }
+
+        .register-form {
+            max-width: 500px;
+            margin: 3rem auto 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        /* フッター */
+        footer {
+            background: #232f3e;
+            color: white;
+            padding: 3rem 0 1rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            color: #ff9900;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #ff9900;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #444;
+            color: #999;
+        }
+
+        /* アニメーション */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #232f3e;
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .venue-content {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-secondary {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+
+            section h2 {
+                font-size: 2rem;
+            }
+        }
+
+        /* カウントダウンタイマー */
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .countdown-item {
+            text-align: center;
+        }
+
+        .countdown-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ff9900;
+            display: block;
+        }
+
+        .countdown-label {
+            font-size: 1rem;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーション -->
+    <nav>
+        <div class="container">
+            <div class="logo">AWS Cloud Conference 2030</div>
+            <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">ホーム</a></li>
+                <li><a href="#features">特徴</a></li>
+                <li><a href="#sessions">セッション</a></li>
+                <li><a href="#venue">会場</a></li>
+                <li><a href="#register">参加登録</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ヒーローセクション -->
+    <section id="home" class="hero">
+        <img src="./hero-background.jpeg" alt="AWS Conference" class="hero-bg">
+        <div class="hero-content">
+            <h1>AWS Cloud Conference 2030</h1>
+            <p>最新のクラウドテクノロジーとイノベーションを体験</p>
+            <div class="hero-date">2030年12月16日（月）- 17日（火）</div>
+            
+            <!-- カウントダウンタイマー -->
+            <div class="countdown" id="countdown">
+                <div class="countdown-item">
+                    <span class="countdown-number" id="days">00</span>
+                    <span class="countdown-label">日</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="hours">00</span>
+                    <span class="countdown-label">時間</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="minutes">00</span>
+                    <span class="countdown-label">分</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="seconds">00</span>
+                    <span class="countdown-label">秒</span>
+                </div>
+            </div>
+
+            <div>
+                <a href="#register" class="btn">今すぐ参加登録</a>
+                <a href="#sessions" class="btn btn-secondary">プログラムを見る</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特徴セクション -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2>カンファレンスの特徴</h2>
+            <p class="subtitle">日本最大級のAWSカンファレンスで最新技術を学ぶ</p>
+            
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🎯</div>
+                    <h3>50+ のセッション</h3>
+                    <p>AI/ML、サーバーレス、コンテナ、セキュリティなど幅広いトピックを網羅</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">👥</div>
+                    <h3>業界のエキスパート</h3>
+                    <p>AWS認定のエキスパートや先進企業の実践事例を直接学べます</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🤝</div>
+                    <h3>ネットワーキング</h3>
+                    <p>2000人以上の参加者とのネットワーキング機会</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">💼</div>
+                    <h3>ハンズオンラボ</h3>
+                    <p>実際にAWSサービスを体験できるハンズオントレーニング</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🎁</div>
+                    <h3>限定特典</h3>
+                    <p>参加者限定のAWSクレジットと学習リソースを提供</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🌟</div>
+                    <h3>認定資格サポート</h3>
+                    <p>AWS認定試験対策セッションと無料の模擬試験</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- セッションセクション -->
+    <section id="sessions">
+        <div class="container">
+            <h2>主要セッション</h2>
+            <p class="subtitle">最新のAWSサービスと実践的なユースケースを学ぶ</p>
+            
+            <div class="sessions-grid">
+                <div class="session-card">
+                    <div class="session-time">⏰ 10:00 - 11:00 | Day 1</div>
+                    <h3>基調講演：クラウドの未来とAWSの最新サービス</h3>
+                    <p>AWS Japan代表による最新サービス発表とクラウド戦略</p>
+                    <p><strong>スピーカー:</strong> AWS Japan 代表取締役社長</p>
+                </div>
+                
+                <div class="session-card">
+                    <div class="session-time">⏰ 11:30 - 12:30 | Day 1</div>
+                    <h3>生成AIとAmazon Bedrock実践ガイド</h3>
+                    <p>Amazon Bedrockを活用した生成AIアプリケーションの構築方法</p>
+                    <p><strong>スピーカー:</strong> AWSソリューションアーキテクト</p>
+                </div>
+                
+                <div class="session-card">
+                    <div class="session-time">⏰ 13:30 - 14:30 | Day 1</div>
+                    <h3>サーバーレスアーキテクチャのベストプラクティス</h3>
+                    <p>Lambda、API Gateway、DynamoDBを使った大規模システム構築</p>
+                    <p><strong>スピーカー:</strong> AWS認定アーキテクト</p>
+                </div>
+                
+                <div class="session-card">
+                    <div class="session-time">⏰ 15:00 - 16:00 | Day 1</div>
+                    <h3>コンテナとKubernetes on AWS</h3>
+                    <p>ECS、EKS、Fargateを使ったコンテナ運用の最適化</p>
+                    <p><strong>スピーカー:</strong> DevOpsエンジニア</p>
+                </div>
+                
+                <div class="session-card">
+                    <div class="session-time">⏰ 10:00 - 11:00 | Day 2</div>
+                    <h3>クラウドセキュリティとコンプライアンス</h3>
+                    <p>AWS Well-Architected Frameworkに基づくセキュリティ対策</p>
+                    <p><strong>スピーカー:</strong> セキュリティスペシャリスト</p>
+                </div>
+                
+                <div class="session-card">
+                    <div class="session-time">⏰ 11:30 - 12:30 | Day 2</div>
+                    <h3>データ分析とビッグデータ処理</h3>
+                    <p>Redshift、Athena、Glueを活用したデータレイク構築</p>
+                    <p><strong>スピーカー:</strong> データエンジニア</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 会場セクション -->
+    <section id="venue" class="venue">
+        <div class="container">
+            <h2>会場情報</h2>
+            <p class="subtitle">アクセス抜群の都心会場で開催</p>
+            
+            <div class="venue-content">
+                <img src="./conference-venue.jpeg" alt="Conference Venue" class="venue-image">
+                
+                <div class="venue-details">
+                    <h3>📍 東京国際フォーラム</h3>
+                    <p><strong>住所:</strong> 〒100-0005 東京都千代田区丸の内3丁目5-1</p>
+                    <p><strong>アクセス:</strong></p>
+                    <ul style="margin-left: 1.5rem;">
+                        <li>JR有楽町駅より徒歩1分</li>
+                        <li>東京メトロ有楽町駅直結</li>
+                        <li>JR東京駅より徒歩5分</li>
+                    </ul>
+                    <p><strong>開催時間:</strong></p>
+                    <ul style="margin-left: 1.5rem;">
+                        <li>12月16日（月）9:00 - 18:00</li>
+                        <li>12月17日（火）9:00 - 17:00</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>受付:</strong> 8:30より開始</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- スポンサーセクション -->
+    <section id="sponsors" class="sponsors">
+        <div class="container">
+            <h2>スポンサー企業</h2>
+            <p class="subtitle">このイベントは以下の企業様のご支援により開催されています</p>
+            
+            <div class="sponsors-grid">
+                <div class="sponsor-box">Platinum Sponsor</div>
+                <div class="sponsor-box">Gold Sponsor</div>
+                <div class="sponsor-box">Gold Sponsor</div>
+                <div class="sponsor-box">Silver Sponsor</div>
+                <div class="sponsor-box">Silver Sponsor</div>
+                <div class="sponsor-box">Silver Sponsor</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 参加登録セクション -->
+    <section id="register" class="register">
+        <div class="container">
+            <h2>参加登録</h2>
+            <p class="subtitle">今すぐ登録して、最新のクラウドテクノロジーを学びましょう</p>
+            
+            <div class="register-form">
+                <form onsubmit="handleSubmit(event)">
+                    <div class="form-group">
+                        <label for="name">お名前 *</label>
+                        <input type="text" id="name" required placeholder="山田 太郎">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">メールアドレス *</label>
+                        <input type="email" id="email" required placeholder="example@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="company">会社名 *</label>
+                        <input type="text" id="company" required placeholder="株式会社〇〇">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="role">役職</label>
+                        <input type="text" id="role" placeholder="エンジニア、マネージャーなど">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ticket">チケットタイプ *</label>
+                        <select id="ticket" required>
+                            <option value="">選択してください</option>
+                            <option value="early">アーリーバード（無料）</option>
+                            <option value="standard">スタンダード（無料）</option>
+                            <option value="vip">VIPパス（¥10,000）</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">登録する</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- フッター -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AWS Cloud Conference</h3>
+                    <p>日本最大級のAWSユーザーカンファレンス。最新のクラウドテクノロジーとイノベーションを体験できる2日間のイベントです。</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>リンク</h3>
+                    <ul>
+                        <li><a href="#home">ホーム</a></li>
+                        <li><a href="#features">特徴</a></li>
+                        <li><a href="#sessions">セッション</a></li>
+                        <li><a href="#venue">会場</a></li>
+                        <li><a href="#register">参加登録</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>お問い合わせ</h3>
+                    <ul>
+                        <li>📧 <a href="mailto:info@awsconference.jp"><span class="__cf_email__">info@awsconference.jp</span></a></li>
+                        <li>📞 03-1234-5678</li>
+                        <li>🕐 平日 10:00-18:00</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>フォローする</h3>
+                    <ul>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">Facebook</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                        <li><a href="#">YouTube</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2030 AWS Cloud Conference. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // メニュートグル
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        // スムーズスクロール
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // モバイルメニューを閉じる
+                    document.getElementById('navLinks').classList.remove('active');
+                }
+            });
+        });
+
+        // カウントダウンタイマー
+        function updateCountdown() {
+            const eventDate = new Date('2030-12-16T09:00:00').getTime();
+            const now = new Date().getTime();
+            const distance = eventDate - now;
+
+            if (distance > 0) {
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById('days').textContent = String(days).padStart(2, '0');
+                document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+            }
+        }
+
+        // カウントダウンを1秒ごとに更新
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // フォーム送信処理
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const company = document.getElementById('company').value;
+            const role = document.getElementById('role').value;
+            const ticket = document.getElementById('ticket').value;
+            
+            // ここで実際のAPI呼び出しを行います
+            alert(`ご登録ありがとうございます！\n\nお名前: ${name}\nメール: ${email}\n会社名: ${company}\n\n確認メールを送信しました。`);
+            
+            // フォームをリセット
+            event.target.reset();
+        }
+
+        // スクロールアニメーション
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // アニメーション対象の要素を監視
+        document.querySelectorAll('.feature-card, .session-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

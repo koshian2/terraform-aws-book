@@ -1,0 +1,40 @@
+#cloud-config
+runcmd:
+  - |
+      bash -lc '
+        set -euxo pipefail
+        export DEBIAN_FRONTEND=noninteractive
+
+        # 1) 必須パッケージ（awscliは入れない）
+        apt-get update -y
+        apt-get install -y python3-venv python3-pip curl unzip build-essential libjpeg-dev zlib1g-dev ca-certificates
+
+        # 2) AWS CLI v2 を公式から導入
+        cd /tmp
+        curl -fsSLo awscliv2.zip "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+        unzip -q awscliv2.zip
+        ./aws/install
+        aws --version
+
+        # 3) アプリ配置
+        install -d -o ubuntu -g ubuntu /opt/app
+
+        # 4) S3 から取得（region は Terraform から注入）
+        aws s3 cp s3://${bucket}/${prefix}/requirements.txt /opt/app/requirements.txt --region "${region}"
+        aws s3 cp s3://${bucket}/${prefix}/app.py           /opt/app/app.py           --region "${region}"
+        aws s3 cp s3://${bucket}/${prefix}/gradio.service  /etc/systemd/system/gradio.service --region "${region}"
+
+        # 5) venv & 依存
+        python3 -m venv /opt/app/venv
+        /opt/app/venv/bin/pip install --upgrade pip
+        /opt/app/venv/bin/pip install -r /opt/app/requirements.txt
+
+        # 6) 権限 & 起動
+        chown -R ubuntu:ubuntu /opt/app
+        chmod 0644 /etc/systemd/system/gradio.service
+        systemctl daemon-reload
+        systemctl enable --now gradio.service
+
+        # 7) 後片付け（任意）
+        rm -rf /tmp/aws /tmp/awscliv2.zip || true
+      '
