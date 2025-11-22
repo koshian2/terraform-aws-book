@@ -1,0 +1,6 @@
+[
+  { "duration": 60, "users": 10, "spawn_rate": 2 },
+  { "duration": 120, "users": 20, "spawn_rate": 2 },
+  { "duration": 180, "users": 40, "spawn_rate": 5 },
+  { "duration": 240, "users": 80, "spawn_rate": 5 }
+]

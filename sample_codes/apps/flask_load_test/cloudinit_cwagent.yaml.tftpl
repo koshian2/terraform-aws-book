@@ -1,0 +1,40 @@
+#cloud-config
+package_update: true
+packages:
+  - python3-venv
+  - python3-pip
+  - curl
+
+write_files:
+  - path: /opt/app/app.py
+    permissions: '0644'
+    owner: www-data:www-data
+    encoding: b64
+    content: ${app_py_b64}
+
+  - path: /etc/systemd/system/gunicorn.service
+    permissions: '0644'
+    owner: root:root
+    encoding: b64
+    content: ${gunicorn_service_b64}
+
+  - path: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+    permissions: '0644'
+    owner: root:root
+    encoding: b64
+    content: ${cwagent_config_b64}
+
+runcmd:
+  - [bash, -lc, 'mkdir -p /opt/app && chown -R www-data:www-data /opt/app']
+  - [bash, -lc, 'python3 -m venv /opt/app/venv']
+  - [bash, -lc, '/opt/app/venv/bin/pip install --upgrade pip flask gunicorn']
+  - [bash, -lc, 'dd if=/dev/zero of=/opt/app/blob.bin bs=1M count=10 && chown www-data:www-data /opt/app/blob.bin']
+
+  # === CloudWatch Agent install & start ===
+  - [bash, -lc, 'mkdir -p /opt/aws/amazon-cloudwatch-agent/etc']
+  - [bash, -lc, 'curl -fsSL -o /tmp/amazon-cloudwatch-agent.deb https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb']
+  - [bash, -lc, 'dpkg -i /tmp/amazon-cloudwatch-agent.deb']
+  - [bash, -lc, '/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s']
+
+  - [bash, -lc, 'systemctl daemon-reload']
+  - [bash, -lc, 'systemctl enable --now gunicorn.service']
