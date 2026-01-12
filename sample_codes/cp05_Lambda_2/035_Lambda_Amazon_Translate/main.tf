@@ -31,9 +31,9 @@ resource "aws_iam_role" "lambda_role" {
 }
 
 # Amazon Translateを動かすためのポリシー。リソースベースのポリシー制御ができないので、リソースは*でOK
-resource "aws_iam_role_policy" "s3_write_policy" {
   name        = "TranslatePolicy"
   role        = aws_iam_role.lambda_role.id
+resource "aws_iam_role_policy" "translate_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17",
