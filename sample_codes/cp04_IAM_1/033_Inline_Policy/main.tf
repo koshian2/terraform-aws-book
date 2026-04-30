@@ -13,18 +13,19 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# S3バケット名を入力
+# S3バケット名を入力 / Enter S3 bucket name
 variable "s3_bucket_name" {
-  type = string # terraform.tfvarsで規定
+  type = string # terraform.tfvarsで規定 / Defined in terraform.tfvars
 }
 
-# S3バケットの作成
+# S3バケットの作成 / Create S3 bucket
 resource "aws_s3_bucket" "example_bucket" {
   bucket        = var.s3_bucket_name
-  force_destroy = true # 開発用
+  force_destroy = true # 開発用 / For development
 }
 
 # ロールを作成（assume_role_policyをJSONで直接記述するのもOK）
+# Create role (writing assume_role_policy directly in JSON is also OK)
 resource "aws_iam_role" "lambda_role" {
   name = "LambdaS3Role"
   assume_role_policy = jsonencode({
@@ -42,6 +43,7 @@ resource "aws_iam_role" "lambda_role" {
 }
 
 # S3に書き込みできるポリシーの作成と登録。インラインポリシーで定義
+# Create and register a policy that allows writing to S3. Defined as an inline policy
 resource "aws_iam_role_policy" "s3_write_policy" {
   name        = "LambdaS3WritePolicy"
   role        = aws_iam_role.lambda_role.id
@@ -62,20 +64,20 @@ resource "aws_iam_role_policy" "s3_write_policy" {
   })
 }
 
-# AWSLambdaBasicExecutionRoleマネージドポリシー
+# AWSLambdaBasicExecutionRoleマネージドポリシー / AWSLambdaBasicExecutionRole managed policy
 resource "aws_iam_role_policy_attachment" "managed_policy" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Lambdaの作成
+# Lambdaの作成 / Create Lambda
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "lambda_function.py"
   output_path = ".cache/lambda_function.zip"
 }
 
-# Lambdaの作成
+# Lambdaの作成 / Create Lambda
 resource "aws_lambda_function" "s3_lambda" {
   filename         = data.archive_file.lambda.output_path
   function_name    = "s3_write_lambda"

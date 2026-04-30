@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 variable "bucket_name" {
-  type = string # terraform.tfvarsで規定
+  type = string # terraform.tfvarsで規定 / Defined in terraform.tfvars
 }
 
 locals {
@@ -26,13 +26,13 @@ locals {
   ]
 }
 
-# バケットの作成
+# バケットの作成 / Create bucket
 resource "aws_s3_bucket" "website_bucket" {
   bucket        = var.bucket_name
-  force_destroy = true # 開発用
+  force_destroy = true # 開発用 / For development
 }
 
-# ファイルアップロード
+# ファイルアップロード / Upload files
 resource "aws_s3_object" "object" {
   for_each = toset(local.html_files)
 
@@ -43,7 +43,7 @@ resource "aws_s3_object" "object" {
   source_hash  = filemd5("./html/${each.value}")
 }
 
-# Webサイトの設定
+# Webサイトの設定 / Website configuration
 resource "aws_s3_bucket_website_configuration" "circle_site" {
   bucket = aws_s3_bucket.website_bucket.id
 
@@ -56,7 +56,7 @@ resource "aws_s3_bucket_website_configuration" "circle_site" {
   }
 }
 
-# 公開読み取りポリシーの定義
+# 公開読み取りポリシーの定義 / Define public read policy
 data "aws_iam_policy_document" "public_read_policy" {
   statement {
     effect = "Allow"
@@ -71,7 +71,7 @@ data "aws_iam_policy_document" "public_read_policy" {
   }
 }
 
-# パブリックアクセスブロックの設定を無効化
+# パブリックアクセスブロックの設定を無効化 / Disable public access block settings
 resource "aws_s3_bucket_public_access_block" "website_bucket_public_access_block" {
   bucket = aws_s3_bucket.website_bucket.id
 
@@ -81,14 +81,14 @@ resource "aws_s3_bucket_public_access_block" "website_bucket_public_access_block
   restrict_public_buckets = false
 }
 
-# バケットポリシーの設定
+# バケットポリシーの設定 / Configure bucket policy
 resource "aws_s3_bucket_policy" "website_bucket_policy" {
   bucket     = aws_s3_bucket.website_bucket.id
   policy     = data.aws_iam_policy_document.public_read_policy.json
   depends_on = [aws_s3_bucket_public_access_block.website_bucket_public_access_block]
 }
 
-# トップページのURLを表示
+# トップページのURLを表示 / Display the top page URL
 output "website_url" {
   value = "http://${aws_s3_bucket_website_configuration.circle_site.website_endpoint}"
 }

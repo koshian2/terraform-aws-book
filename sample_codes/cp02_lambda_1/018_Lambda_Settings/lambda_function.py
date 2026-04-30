@@ -3,7 +3,7 @@ import time
 import json
 
 def is_prime(n):
-    """与えられた数が素数かどうかを判定する関数"""
+    """与えられた数が素数かどうかを判定する関数 / Function to determine if a given number is prime"""
     if n < 2:
         return False
     for i in range(2, int(math.isqrt(n)) + 1):
@@ -12,7 +12,7 @@ def is_prime(n):
     return True
 
 def find_primes(limit):
-    """指定された範囲内の素数をリストで返す関数"""
+    """指定された範囲内の素数をリストで返す関数 / Function to return a list of primes within a specified range"""
     primes = []
     for num in range(2, limit + 1):
         if is_prime(num):
@@ -20,7 +20,7 @@ def find_primes(limit):
     return primes
 
 def lambda_handler(event, context):
-    limit = event.get("limit", 100000)  # 処理する上限値
+    limit = event.get("limit", 100000)  # 処理する上限値 / Upper limit to process
     start_time = time.time()
     
     primes = find_primes(limit)

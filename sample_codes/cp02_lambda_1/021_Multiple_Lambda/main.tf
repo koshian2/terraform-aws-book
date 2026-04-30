@@ -48,6 +48,7 @@ data "archive_file" "lambda" {
 }
 
 # listの場合はtoset()でsetに変換
+# For list, convert to set using toset()
 resource "aws_lambda_function" "env_sample1" {
   for_each         = toset(var.environments_list)
   filename         = data.archive_file.lambda.output_path
@@ -59,12 +60,13 @@ resource "aws_lambda_function" "env_sample1" {
 
   environment {
     variables = {
-      ENV_NAME = each.value # each.keyでも同じ
+      ENV_NAME = each.value # each.keyでも同じ / same as each.key
     }
   }
 }
 
 # mapはそのまま突っ込むでOK
+# For map, you can pass it directly
 resource "aws_lambda_function" "env_sample2" {
   for_each         = var.environments_map
   filename         = data.archive_file.lambda.output_path
@@ -76,12 +78,12 @@ resource "aws_lambda_function" "env_sample2" {
 
   environment {
     variables = {
-      ENV_NAME = each.value # development, staging, productionの略していない値が格納される
+      ENV_NAME = each.value # development, staging, productionの略していない値が格納される / Stores the unabbreviated values: development, staging, production
     }
   }
 }
 
-# 複雑にネストした型
+# 複雑にネストした型 / Complex nested type
 resource "aws_lambda_function" "env_sample3" {
   for_each         = var.environments_with_setting
   filename         = data.archive_file.lambda.output_path

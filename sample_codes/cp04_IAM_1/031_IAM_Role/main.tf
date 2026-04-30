@@ -13,7 +13,7 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# 信頼関係の定義
+# 信頼関係の定義 / Define trust relationship
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
@@ -27,19 +27,19 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-# ロールを作成
+# ロールを作成 / Create role
 resource "aws_iam_role" "lambda_role" {
   name               = "LambdaBasicRole"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
-# AWSLambdaBasicExecutionRoleマネージドポリシーを追加
+# AWSLambdaBasicExecutionRoleマネージドポリシーを追加 / Attach AWSLambdaBasicExecutionRole managed policy
 resource "aws_iam_role_policy_attachment" "managed_policy" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Lambdaの作成
+# Lambdaの作成 / Create Lambda
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "lambda_function.py"
@@ -49,7 +49,7 @@ data "archive_file" "lambda" {
 resource "aws_lambda_function" "hello_world" {
   filename         = data.archive_file.lambda.output_path
   function_name    = "hello_lambda_terraform"
-  role             = aws_iam_role.lambda_role.arn # 先ほど作成したLambdaのロールを指定
+  role             = aws_iam_role.lambda_role.arn # 先ほど作成したLambdaのロールを指定 / Specify the Lambda role created above
   handler          = "lambda_function.lambda_handler"
   runtime          = "python3.12"
   source_code_hash = data.archive_file.lambda.output_base64sha256

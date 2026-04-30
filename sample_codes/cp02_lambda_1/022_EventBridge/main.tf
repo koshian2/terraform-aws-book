@@ -30,20 +30,20 @@ resource "aws_lambda_function" "hello_world" {
   source_code_hash = data.archive_file.lambda.output_base64sha256
 }
 
-# スケジュールイベントルールの作成 (5分ごと)
+# スケジュールイベントルールの作成 (5分ごと) / Create a schedule event rule (every 5 minutes)
 resource "aws_cloudwatch_event_rule" "every_five_minutes" {
   name                = "every_five_minutes_rule"
   schedule_expression = "rate(5 minutes)"
 }
 
-# Lambda にイベントルールをターゲットとして追加
+# Lambda にイベントルールをターゲットとして追加 / Add the event rule as a target for Lambda
 resource "aws_cloudwatch_event_target" "lambda_target" {
   rule      = aws_cloudwatch_event_rule.every_five_minutes.name
   target_id = "lambda"
   arn       = aws_lambda_function.hello_world.arn
 }
 
-# Lambda に EventBridge からの呼び出しを許可
+# Lambda に EventBridge からの呼び出しを許可 / Allow Lambda invocation from EventBridge
 resource "aws_lambda_permission" "allow_eventbridge" {
   statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
