@@ -1,1 +1,1 @@
-email_address = "<your-email@example.com>" # ここにメールアドレスを入れる（"your-email@example.com"）
+email_address = "<your-email@example.com>" # ここにメールアドレスを入れる / Enter your email address here (e.g., "your-email@example.com")

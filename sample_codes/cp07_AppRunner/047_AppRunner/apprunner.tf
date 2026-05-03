@@ -1,9 +1,9 @@
-# ECR リポジトリのデータ取得
+# ECR リポジトリのデータ取得 / Retrieve ECR repository data
 data "aws_ecr_repository" "app_repo" {
   name = var.ecr_repository_name
 }
 
-# App Runner が ECR にアクセスするためのデプロイ用の IAM ロール作成
+# App Runner が ECR にアクセスするためのデプロイ用の IAM ロール作成 / Create IAM role for App Runner deploy to access ECR
 resource "aws_iam_role" "apprunner_deploy_role" {
   name = "${var.app_service_name}DeployRole"
 
@@ -21,7 +21,7 @@ resource "aws_iam_role" "apprunner_deploy_role" {
   })
 }
 
-# App Runner のデプロイに必要なポリシーのアタッチ
+# App Runner のデプロイに必要なポリシーのアタッチ / Attach policy required for App Runner deployment
 resource "aws_iam_role_policy" "apprunner_deploy_policy" {
   role = aws_iam_role.apprunner_deploy_role.name
   policy = jsonencode({
@@ -56,7 +56,7 @@ resource "aws_iam_role_policy" "apprunner_deploy_policy" {
   })
 }
 
-# AppRunnerのプログラム上で動かすためのインスタンスロール
+# AppRunnerのプログラム上で動かすためのインスタンスロール / Instance role for the App Runner program at runtime
 resource "aws_iam_role" "apprunner_instance_role" {
   name = "${var.app_service_name}InstanceRole"
 
@@ -74,7 +74,7 @@ resource "aws_iam_role" "apprunner_instance_role" {
   })
 }
 
-# AppRunnerのインスタンスに必要なポリシー
+# AppRunnerのインスタンスに必要なポリシー / Policy required for App Runner instance
 resource "aws_iam_role_policy" "apprunner_instance_policy" {
   role = aws_iam_role.apprunner_instance_role.name
   policy = jsonencode({
@@ -92,18 +92,18 @@ resource "aws_iam_role_policy" "apprunner_instance_policy" {
   })
 }
 
-# パスワードのパラメーターストア
+# パスワードのパラメーターストア / Parameter Store for password
 data "aws_ssm_parameter" "apprunner_password" {
   name = "/apprunner/login_password"
 }
 
-# AppRunnerのイメージのURIを取得
+# AppRunnerのイメージのURIを取得 / Get App Runner image URI
 data "aws_ecr_image" "app_image" {
   repository_name = var.ecr_repository_name
   image_tag       = var.ecr_docker_image_tag
 }
 
-# App Runner サービスの作成
+# App Runner サービスの作成 / Create App Runner service
 resource "aws_apprunner_service" "app_service" {
   service_name = var.app_service_name
 
@@ -120,10 +120,10 @@ resource "aws_apprunner_service" "app_service" {
       image_configuration {
         port = var.app_port
         runtime_environment_variables = {
-          USERNAME = "terraform_aws" # 環境変数の指定
+          USERNAME = "terraform_aws" # 環境変数の指定 / Specify environment variable
         }
         runtime_environment_secrets = {
-          PASSWORD = data.aws_ssm_parameter.apprunner_password.arn # ARN指定も可能
+          PASSWORD = data.aws_ssm_parameter.apprunner_password.arn # ARN指定も可能 / ARN can also be specified
         }
       }
     }
@@ -136,7 +136,7 @@ resource "aws_apprunner_service" "app_service" {
   }
 }
 
-# デプロイされた App Runner サービスの URL
+# デプロイされた App Runner サービスの URL / URL of the deployed App Runner service
 output "apprunner_service_url" {
   value = aws_apprunner_service.app_service.service_url
 }

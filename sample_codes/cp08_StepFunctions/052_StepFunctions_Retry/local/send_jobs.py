@@ -5,12 +5,12 @@ import string
 import time
 from botocore.exceptions import ClientError
 
-# ステートマシン名
+# ステートマシン名 / State machine name
 STATE_MACHINE_NAME = 'RetryStateMachine'
-# AWSプロファイル名
+# AWSプロファイル名 / AWS profile name
 AWS_PROFILE = 'develop'
 
-# boto3セッションの作成
+# boto3セッションの作成 / Create boto3 session
 session = boto3.Session(profile_name=AWS_PROFILE)
 sfn_client = session.client('stepfunctions')
 

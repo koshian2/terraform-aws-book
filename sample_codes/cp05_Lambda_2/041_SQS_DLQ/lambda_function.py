@@ -3,12 +3,12 @@ import random
 
 def lambda_handler(event, context):
     for record in event['Records']:
-        # 30%の確率で例外
+        # 30%の確率で例外 / 30% chance of exception
         failure_probability = 0.3
         if random.random() < failure_probability:
             raise Exception("Intentional Random Failure for Retry Mechanism")
         
-        # 32の倍数のIDは絶対に失敗させる
+        # 32の倍数のIDは絶対に失敗させる / Always fail for IDs that are multiples of 32
         body = record.get('body', {})
         body = json.loads(body)
         if int(body['id']) % 32 == 0:

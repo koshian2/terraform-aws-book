@@ -13,7 +13,7 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# ロールを作成
+# ロールを作成 / Create role
 resource "aws_iam_role" "lambda_role" {
   name = "LambdaTranslateRole"
   assume_role_policy = jsonencode({
@@ -31,9 +31,10 @@ resource "aws_iam_role" "lambda_role" {
 }
 
 # Amazon Translateを動かすためのポリシー。リソースベースのポリシー制御ができないので、リソースは*でOK
+# Policy to run Amazon Translate. Resource-based policy control is not available, so resource can be *
+resource "aws_iam_role_policy" "translate_policy" {
   name        = "TranslatePolicy"
   role        = aws_iam_role.lambda_role.id
-resource "aws_iam_role_policy" "translate_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -51,20 +52,20 @@ resource "aws_iam_role_policy" "translate_policy" {
   })
 }
 
-# AWSLambdaBasicExecutionRoleマネージドポリシー
+# AWSLambdaBasicExecutionRoleマネージドポリシー / AWSLambdaBasicExecutionRole managed policy
 resource "aws_iam_role_policy_attachment" "managed_policy" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Lambdaの作成
+# Lambdaの作成 / Create Lambda
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "lambda_function.py"
   output_path = ".cache/lambda_function.zip"
 }
 
-# Lambdaの作成
+# Lambdaの作成 / Create Lambda
 resource "aws_lambda_function" "s3_lambda" {
   filename         = data.archive_file.lambda.output_path
   function_name    = "translate_lambda"
