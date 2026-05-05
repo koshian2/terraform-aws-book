@@ -7,10 +7,10 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# 現在のAWSアカウント情報を取得
+# 現在のAWSアカウント情報を取得 / Get current AWS account information
 data "aws_caller_identity" "current" {}
 
-# 現在のリージョンを取得
+# 現在のリージョンを取得 / Get current region
 data "aws_region" "current" {}
 
 output "account_id" {

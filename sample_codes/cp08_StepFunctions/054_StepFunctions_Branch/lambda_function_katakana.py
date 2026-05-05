@@ -1,7 +1,7 @@
 import random
 
 def lambda_handler(event, context):
-    katakana_list = [chr(i) for i in range(0x30A2, 0x30F4)] # ア～ン
+    katakana_list = [chr(i) for i in range(0x30A2, 0x30F4)] # ア～ン / a-n (katakana)
     num_selected = random.randint(1, 5)
     selected_katakana = random.sample(katakana_list, num_selected)
 

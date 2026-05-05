@@ -5,6 +5,6 @@ terraform {
 }
 
 resource "local_file" "example" {
-  content  = "サンプルのローカルファイル"
+  content  = "サンプルのローカルファイル / Sample local file"
   filename = "${path.module}/example.txt"
 }

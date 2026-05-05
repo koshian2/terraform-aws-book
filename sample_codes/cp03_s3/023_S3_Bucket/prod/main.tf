@@ -17,7 +17,7 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# S3バケットの作成（本番目的）
+# S3バケットの作成（本番目的） / Create S3 bucket (for production)
 resource "aws_s3_bucket" "example" {
   bucket = var.bucket_name
 

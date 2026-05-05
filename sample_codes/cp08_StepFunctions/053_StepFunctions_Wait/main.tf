@@ -15,22 +15,22 @@ variable "email_address" {
 
 provider "aws" {
   profile = var.aws_profile_name
-  region  = "ap-northeast-1" # 必要に応じてリージョンを変更
+  region  = "ap-northeast-1" # 必要に応じてリージョンを変更 / Change region as needed
 }
 
-# SNS トピックの作成
+# SNS トピックの作成 / Create SNS topic
 resource "aws_sns_topic" "email_topic" {
   name = "email-notification-topic"
 }
 
-# SNS トピックへのメール購読
+# SNS トピックへのメール購読 / Email subscription to SNS topic
 resource "aws_sns_topic_subscription" "email_subscription" {
   topic_arn = aws_sns_topic.email_topic.arn
   protocol  = "email"
   endpoint  = var.email_address
 }
 
-# Step Functions用のIAMロールを作成
+# Step Functions用のIAMロールを作成 / Create IAM role for Step Functions
 resource "aws_iam_role" "step_functions_role" {
   name = "step_functions_role"
 
@@ -46,7 +46,7 @@ resource "aws_iam_role" "step_functions_role" {
   })
 }
 
-# Step FunctionsロールにSNSのイベント通知権限を付与
+# Step FunctionsロールにSNSのイベント通知権限を付与 / Grant SNS publish permission to Step Functions role
 resource "aws_iam_role_policy" "step_functions_policy" {
   name = "step_functions_policy"
   role = aws_iam_role.step_functions_role.id
@@ -65,7 +65,7 @@ resource "aws_iam_role_policy" "step_functions_policy" {
   })
 }
 
-# Step Functionsのステートマシンを定義
+# Step Functionsのステートマシンを定義 / Define Step Functions state machine
 resource "aws_sfn_state_machine" "state_machine" {
   name     = "SNSWaitStateMachine"
   role_arn = aws_iam_role.step_functions_role.arn

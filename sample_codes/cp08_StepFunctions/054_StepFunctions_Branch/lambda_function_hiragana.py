@@ -1,7 +1,7 @@
 import random
 
 def lambda_handler(event, context):
-    hiragana_list = [chr(i) for i in range(0x3042, 0x3094)] # あ～ん
+    hiragana_list = [chr(i) for i in range(0x3042, 0x3094)] # あ～ん / a-n (hiragana)
     num_selected = random.randint(1, 5)
     selected_hiragana = random.sample(hiragana_list, num_selected)
 

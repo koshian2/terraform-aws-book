@@ -11,7 +11,7 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# S3バケットの作成
+# S3バケットの作成 / Create S3 bucket
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "${var.state_bucket_name}-terraform-state-bucket"
 
@@ -25,7 +25,7 @@ resource "aws_s3_bucket" "terraform_state" {
   }
 }
 
-# バージョニングの有効化
+# バージョニングの有効化 / Enable versioning
 resource "aws_s3_bucket_versioning" "versioning_enabled" {
   bucket = aws_s3_bucket.terraform_state.id
   versioning_configuration {
@@ -37,7 +37,7 @@ resource "aws_s3_bucket_versioning" "versioning_enabled" {
   }
 }
 
-# DynamoDBテーブルの作成（ロック管理用）
+# DynamoDBテーブルの作成（ロック管理用） / Create DynamoDB table (for lock management)
 resource "aws_dynamodb_table" "terraform_locks" {
   name         = "${var.state_bucket_name}-terraform-locks"
   billing_mode = "PAY_PER_REQUEST"

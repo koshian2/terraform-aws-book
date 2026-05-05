@@ -39,6 +39,6 @@ resource "aws_lambda_function" "numpy_linear_algebra" {
   source_code_hash = data.archive_file.lambda.output_base64sha256
 
   layers = [
-    aws_lambda_layer_version.numpy_layer.arn # 追加したレイヤーを指定
+    aws_lambda_layer_version.numpy_layer.arn # 追加したレイヤーを指定 / Specify the added layer
   ]
 }

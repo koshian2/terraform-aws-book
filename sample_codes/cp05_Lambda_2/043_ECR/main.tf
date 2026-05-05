@@ -19,26 +19,26 @@ variable "ecr_repository_name" {
 }
 
 
-# ECRリポジトリの作成
+# ECRリポジトリの作成 / Create ECR repository
 resource "aws_ecr_repository" "terraform_aws_book" {
   name = var.ecr_repository_name
 
-  # イメージスキャンの設定：Push時にスキャニングする
+  # イメージスキャンの設定：Push時にスキャニングする / Image scan settings: scan on push
   image_scanning_configuration {
     scan_on_push = true
   }
 
   lifecycle {
-    prevent_destroy = true # 破棄されないようにする
+    prevent_destroy = true # 破棄されないようにする / Prevent destruction
 
   }
 }
 
-# ライフサイクルポリシーの設定（オプション）
+# ライフサイクルポリシーの設定（オプション） / Configure lifecycle policy (optional)
 resource "aws_ecr_lifecycle_policy" "terraform_aws_book" {
   repository = aws_ecr_repository.terraform_aws_book.name
 
-  # タグのついていないイメージを30日経過後に削除する
+  # タグのついていないイメージを30日経過後に削除する / Delete untagged images after 30 days
   policy = jsonencode({
     "rules" = [
       {
@@ -58,6 +58,6 @@ resource "aws_ecr_lifecycle_policy" "terraform_aws_book" {
   })
 
   lifecycle {
-    prevent_destroy = true # 破棄されないようにする
+    prevent_destroy = true # 破棄されないようにする / Prevent destruction
   }
 }

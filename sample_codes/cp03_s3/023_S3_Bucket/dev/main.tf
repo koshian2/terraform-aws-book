@@ -17,7 +17,7 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# S3バケットの作成
+# S3バケットの作成 / Create S3 bucket
 resource "aws_s3_bucket" "example" {
   bucket        = var.bucket_name
   force_destroy = true

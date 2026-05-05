@@ -19,7 +19,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "example" {
   bucket        = var.bucket_name
-  force_destroy = true # 開発用
+  force_destroy = true # 開発用 / For development
 }
 
 resource "aws_s3_bucket_versioning" "versioning_enabled" {

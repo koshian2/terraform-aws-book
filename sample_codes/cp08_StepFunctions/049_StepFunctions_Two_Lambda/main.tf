@@ -13,7 +13,7 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# ロールを作成
+# ロールを作成 / Create role
 resource "aws_iam_role" "lambda_role" {
   name = "LambdaExecutionRole"
   assume_role_policy = jsonencode({
@@ -30,7 +30,7 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-# Lambdaの設定
+# Lambdaの設定 / Lambda configuration
 locals {
   lambda_functions = [
     "lambda_function_one",
@@ -38,13 +38,13 @@ locals {
   ]
 }
 
-# AWSLambdaBasicExecutionRoleマネージドポリシー
+# AWSLambdaBasicExecutionRoleマネージドポリシー / AWSLambdaBasicExecutionRole managed policy
 resource "aws_iam_role_policy_attachment" "managed_policy" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# LambdaのZipの作成
+# LambdaのZipの作成 / Create Lambda Zip
 data "archive_file" "lambdas" {
   for_each    = toset(local.lambda_functions)
   type        = "zip"
@@ -52,7 +52,7 @@ data "archive_file" "lambdas" {
   output_path = ".cache/${each.value}.zip"
 }
 
-# Lambdaの作成
+# Lambdaの作成 / Create Lambda
 resource "aws_lambda_function" "lambda_functions" {
   for_each         = toset(local.lambda_functions)
   filename         = data.archive_file.lambdas[each.value].output_path
@@ -63,7 +63,7 @@ resource "aws_lambda_function" "lambda_functions" {
   source_code_hash = data.archive_file.lambdas[each.value].output_base64sha256
 }
 
-# ステートマシンの実行ロールの定義
+# ステートマシンの実行ロールの定義 / Define state machine execution role
 resource "aws_iam_role" "step_functions_role" {
   name = "step_functions_role"
 
@@ -79,7 +79,7 @@ resource "aws_iam_role" "step_functions_role" {
   })
 }
 
-# ステートマシンの実行ロールのポリシーの定義
+# ステートマシンの実行ロールのポリシーの定義 / Define policy for state machine execution role
 resource "aws_iam_role_policy" "step_functions_policy" {
   name = "step_functions_policy"
   role = aws_iam_role.step_functions_role.id
@@ -98,7 +98,7 @@ resource "aws_iam_role_policy" "step_functions_policy" {
   })
 }
 
-# ステートマシンの定義
+# ステートマシンの定義 / Define state machine
 resource "aws_sfn_state_machine" "state_machine" {
   name     = "TwoLambdaStateMachine"
   role_arn = aws_iam_role.step_functions_role.arn

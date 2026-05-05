@@ -8,28 +8,28 @@ import requests
 import json
 import os
 
-# 事前学習済みのResNet-50モデルをロード
+# 事前学習済みのResNet-50モデルをロード / Load pretrained ResNet-50 model
 model = models.resnet50(pretrained=True)
 model.eval()
 
-# クラスラベルのロード（ImageNet）
+# クラスラベルのロード（ImageNet） / Load class labels (ImageNet)
 LABELS_URL = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
 labels = json.loads(requests.get(LABELS_URL).text)
 
-# 画像の前処理
+# 画像の前処理 / Image preprocessing
 def preprocess(image):
     preprocess_transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],  # ImageNetの平均
-            std=[0.229, 0.224, 0.225]    # ImageNetの標準偏差
+            mean=[0.485, 0.456, 0.406],  # ImageNetの平均 / ImageNet mean
+            std=[0.229, 0.224, 0.225]    # ImageNetの標準偏差 / ImageNet standard deviation
         )
     ])
-    return preprocess_transform(image).unsqueeze(0)  # バッチ次元を追加
+    return preprocess_transform(image).unsqueeze(0)  # バッチ次元を追加 / Add batch dimension
 
-# 予測関数
+# 予測関数 / Prediction function
 def classify_image(image):
     input_tensor = preprocess(image)
     with torch.no_grad():
@@ -41,13 +41,13 @@ def classify_image(image):
         results[labels[top5_catid[i]]] = top5_prob[i].item()
     return results
 
-# Gradioインターフェースの設定
+# Gradioインターフェースの設定 / Configure Gradio interface
 iface = gr.Interface(
     fn=classify_image,
     inputs=gr.Image(type="pil"),
     outputs=gr.Label(num_top_classes=5),
-    title="画像分類アプリケーション",
-    description="事前学習済みのResNet-50モデルを使用して、アップロードした画像を分類します。"
+    title="画像分類アプリケーション / Image Classification Application",
+    description="事前学習済みのResNet-50モデルを使用して、アップロードした画像を分類します。 / Classify uploaded images using a pretrained ResNet-50 model."
 )
 
 if __name__ == "__main__":

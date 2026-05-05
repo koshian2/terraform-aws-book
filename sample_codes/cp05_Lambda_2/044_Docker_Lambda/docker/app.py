@@ -7,41 +7,41 @@ import numpy as np
 
 def apply_oil_painting(image_bytes):
     """
-    OpenCVを使用して画像にOil Paintingフィルタを適用します。
+    OpenCVを使用して画像にOil Paintingフィルタを適用します。 / Apply Oil Painting filter to an image using OpenCV.
     """
-    # 画像をバイトデータからNumPy配列に変換
+    # 画像をバイトデータからNumPy配列に変換 / Convert image byte data to NumPy array
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
     if img is None:
-        raise ValueError("画像のデコードに失敗しました。")
+        raise ValueError("画像のデコードに失敗しました。 / Failed to decode image.")
     
-    # Oil Paintingフィルタを適用
+    # Oil Paintingフィルタを適用 / Apply Oil Painting filter
     oil_painting = cv2.xphoto.oilPainting(img, size=7, dynRatio=1)
     
-    # 処理後の画像をエンコード
+    # 処理後の画像をエンコード / Encode processed image
     _, buffer = cv2.imencode('.jpg', oil_painting)
     return buffer.tobytes()
 
 def lambda_handler(event, context):
     s3_client = boto3.client('s3')
     
-    # イベントからバケット名とオブジェクトキーを抽出
+    # イベントからバケット名とオブジェクトキーを抽出 / Extract bucket name and object key from event
     for record in event['Records']:
         source_bucket = record['s3']['bucket']['name']
         source_key = unquote_plus(record['s3']['object']['key'])
         
         try:
-            # S3からオブジェクトを取得
+            # S3からオブジェクトを取得 / Get object from S3
             response = s3_client.get_object(Bucket=source_bucket, Key=source_key)
             image_bytes = response['Body'].read()
             
-            # Oil Paintingフィルタを適用
+            # Oil Paintingフィルタを適用 / Apply Oil Painting filter / Apply Oil Painting filter
             processed_image = apply_oil_painting(image_bytes)
             
-            # 出力バケットにアップロード
+            # 出力バケットにアップロード / Upload to output bucket
             output_bucket = os.environ['OUTPUT_BUCKET']
-            output_key = f"processed_{source_key}"  # 例として "processed_" プレフィックスを追加
+            output_key = f"processed_{source_key}"  # 例として "processed_" プレフィックスを追加 / Add "processed_" prefix as an example
             
             s3_client.put_object(
                 Bucket=output_bucket,

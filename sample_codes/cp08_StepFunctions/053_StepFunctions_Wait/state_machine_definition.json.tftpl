@@ -7,7 +7,7 @@
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
         "TopicArn": "${sns_topic_arn}",
-        "Message": "3分間待ってやる！"
+        "Message": "3分間待ってやる！ / I'll wait three minutes!"
       },
       "Next": "Wait3Minutes"
     },
@@ -21,7 +21,7 @@
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
         "TopicArn": "${sns_topic_arn}",
-        "Message": "時間だ。答えを聞こう！"
+        "Message": "時間だ。答えを聞こう！ / Time's up. Let me hear your answer!"
       },
       "End": true
     }

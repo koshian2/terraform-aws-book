@@ -1,1 +1,1 @@
-これはtest.txtです
+これはtest.txtです / This is test.txt

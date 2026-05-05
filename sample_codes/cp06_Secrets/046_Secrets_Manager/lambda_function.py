@@ -2,7 +2,7 @@ import json
 import os
 import boto3
 
-# シークレットの真の値の取得（グローバルキャッシュして呼び出し回数を減らす）
+# シークレットの真の値の取得（グローバルキャッシュして呼び出し回数を減らす） / Get the actual value of the secret (cache globally to reduce API calls)
 secret_value = None
 
 def get_secret_value():
@@ -21,7 +21,7 @@ def get_secret_value():
         print(e)
         raise e
 
-    # シークレットの取得
+    # シークレットの取得 / Get the secret
     secret = get_secret_value_response['SecretString']
     secret_value = json.loads(secret)
     return secret_value
@@ -32,13 +32,13 @@ def lambda_handler(event, context):
 
     user_value = event.get("input_secrets", "")
 
-    # レスポンスペイロード
+    # レスポンスペイロード / Response payload
     login_success = user_value==password and bool(password)
     payload = {
         "login_success": login_success
     }
 
-    # 簡易認証のレスポンス
+    # 簡易認証のレスポンス / Simple authentication response
     return {
         'statusCode': 200,
         'body': json.dumps(payload)

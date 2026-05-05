@@ -1,4 +1,4 @@
-# ロールを作成
+# ロールを作成 / Create role
 resource "aws_iam_role" "lambda_role" {
   name = "LambdaS3ExecitonRole"
   assume_role_policy = jsonencode({
@@ -15,7 +15,7 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-# Lambdaのポリシー設定（S3の読み書き）
+# Lambdaのポリシー設定（S3の読み書き） / Lambda policy settings (S3 read/write)
 data "aws_iam_policy_document" "translate_policy" {
   statement {
     actions = [
@@ -37,26 +37,26 @@ data "aws_iam_policy_document" "translate_policy" {
   }
 }
 
-# S3を読み書きするポリシー
+# S3を読み書きするポリシー / Policy for reading/writing S3
 resource "aws_iam_role_policy" "s3_write_policy" {
   name   = "LambdaS3ReadWritePolicy"
   role   = aws_iam_role.lambda_role.id
   policy = data.aws_iam_policy_document.translate_policy.json
 }
 
-# AWSLambdaBasicExecutionRoleマネージドポリシー
+# AWSLambdaBasicExecutionRoleマネージドポリシー / AWSLambdaBasicExecutionRole managed policy
 resource "aws_iam_role_policy_attachment" "managed_policy" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# LambdaのイメージのURIを取得
+# LambdaのイメージのURIを取得 / Get Lambda image URI
 data "aws_ecr_image" "lambda_image" {
   repository_name = var.ecr_repository_name
   image_tag       = var.ecr_docker_image_tag
 }
 
-# Lambdaの作成
+# Lambdaの作成 / Create Lambda
 resource "aws_lambda_function" "opencv_lambda" {
   function_name = "s3_trigger_opencv_lambda"
   role          = aws_iam_role.lambda_role.arn

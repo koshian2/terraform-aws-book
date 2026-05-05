@@ -4,33 +4,33 @@ import boto3
 from datetime import datetime, timezone
 
 def lambda_handler(event, context):
-    # 環境変数からS3バケット名を取得
+    # 環境変数からS3バケット名を取得 / Get S3 bucket name from environment variable
     s3_bucket = os.environ.get('S3_BUCKET_NAME')
     if not s3_bucket:
         raise ValueError("Environment variable 'S3_BUCKET_NAME' is not set.")
 
-    # S3クライアントを作成
+    # S3クライアントを作成 / Create S3 client
     s3_client = boto3.client('s3')
 
-    # 現在の日時を取得し、ISOフォーマットに変換
+    # 現在の日時を取得し、ISOフォーマットに変換 / Get current datetime and convert to ISO format
     current_datetime = datetime.now(timezone.utc)
     current_datetime_str = current_datetime.isoformat() + 'Z'
 
-    # サンプルメッセージの作成
-    sample_message = "これはサンプルメッセージです。"
+    # サンプルメッセージの作成 / Create sample message
+    sample_message = "これはサンプルメッセージです。 / This is a sample message."
 
-    # JSONデータの作成
+    # JSONデータの作成 / Create JSON data
     data = {
         "timestamp": current_datetime_str,
         "message": sample_message
     }
     json_data = json.dumps(data, ensure_ascii=False, indent=4)
 
-    # JSONファイル名の生成（例: log_20231001T123000Z.json）
+    # JSONファイル名の生成（例: log_20231001T123000Z.json） / Generate JSON filename (e.g., log_20231001T123000Z.json)
     file_name = f"log_{current_datetime.strftime('%Y%m%dT%H%M%SZ')}.json"
 
     try:
-        # S3にファイルをアップロード
+        # S3にファイルをアップロード / Upload file to S3
         s3_client.put_object(
             Bucket=s3_bucket,
             Key=file_name,
@@ -42,7 +42,7 @@ def lambda_handler(event, context):
         print(f"Error uploading file to S3: {e}")
         raise e
 
-    # 必要に応じてレスポンスを返す
+    # 必要に応じてレスポンスを返す / Return response as needed
     return {
         'statusCode': 200,
         'body': json.dumps(f"File '{file_name}' successfully uploaded to '{s3_bucket}'.")

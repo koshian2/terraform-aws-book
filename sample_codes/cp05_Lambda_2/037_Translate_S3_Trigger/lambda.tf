@@ -1,4 +1,4 @@
-# ロールを作成
+# ロールを作成 / Create role
 resource "aws_iam_role" "lambda_role" {
   name = "LambdaS3ExecitonRole"
   assume_role_policy = jsonencode({
@@ -15,7 +15,7 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-# Lambdaのポリシー設定（S3の読み書き＋Translate）
+# Lambdaのポリシー設定（S3の読み書き＋Translate） / Lambda policy settings (S3 read/write + Translate)
 data "aws_iam_policy_document" "translate_policy" {
   statement {
     actions = [
@@ -49,20 +49,20 @@ resource "aws_iam_role_policy" "s3_write_policy" {
   policy = data.aws_iam_policy_document.translate_policy.json
 }
 
-# AWSLambdaBasicExecutionRoleマネージドポリシー
+# AWSLambdaBasicExecutionRoleマネージドポリシー / AWSLambdaBasicExecutionRole managed policy
 resource "aws_iam_role_policy_attachment" "managed_policy" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# LambdaのZip
+# LambdaのZip / Lambda Zip
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "lambda_function.py"
   output_path = ".cache/lambda_function.zip"
 }
 
-# Lambdaの作成
+# Lambdaの作成 / Create Lambda
 resource "aws_lambda_function" "s3_trigger_lambda" {
   filename         = data.archive_file.lambda.output_path
   function_name    = "s3_trigger_translate_lambda"
