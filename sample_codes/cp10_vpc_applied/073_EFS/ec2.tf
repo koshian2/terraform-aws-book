@@ -115,6 +115,9 @@ resource "aws_instance" "ssm" {
               chmod 775 /mnt/efs/shared
               EOF
 
+  # EFS マウントターゲットが用意されてから EC2 を起動する
+  depends_on = [aws_efs_mount_target.this]
+
   tags = {
     Name = "${var.vpc_name}-ec2-ssm-${count.index}"
   }
