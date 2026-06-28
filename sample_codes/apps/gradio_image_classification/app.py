@@ -9,15 +9,15 @@ import json
 from fastapi import FastAPI
 import uvicorn
 
-# 事前学習済みのResNet-50モデルをロード（新API）
+# 事前学習済みのResNet-50モデルをロード（新API） / Load the pretrained ResNet-50 model with the new API.
 model = models.resnet50(weights=ResNet50_Weights.DEFAULT)
 model.eval()
 
-# クラスラベルのロード（ImageNet）
+# クラスラベルのロード（ImageNet） / Load class labels for ImageNet.
 LABELS_URL = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
 labels = json.loads(requests.get(LABELS_URL).text)
 
-# 画像の前処理
+# 画像の前処理 / Preprocess the image.
 def preprocess(image):
     preprocess_transform = transforms.Compose([
         transforms.Resize(256),
@@ -30,7 +30,7 @@ def preprocess(image):
     ])
     return preprocess_transform(image).unsqueeze(0)
 
-# 予測関数
+# 予測関数 / Prediction function.
 def classify_image(image):
     input_tensor = preprocess(image)
     with torch.no_grad():
@@ -46,21 +46,21 @@ iface = gr.Interface(
     fn=classify_image,
     inputs=gr.Image(type="pil"),
     outputs=gr.Label(num_top_classes=5),
-    title="画像分類アプリケーション",
-    description="事前学習済みのResNet-50モデルを使用して、アップロードした画像を分類します。"
+    title="画像分類アプリケーション / Image Classification App",
+    description="事前学習済みのResNet-50モデルを使用して、アップロードした画像を分類します。 / Classifies uploaded images by using a pretrained ResNet-50 model."
 )
 
-# --- FastAPI 側でヘルスチェック追加 ---
+# --- FastAPI 側でヘルスチェック追加 --- / Add a health check on the FastAPI side.
 app = FastAPI()
 
 @app.get("/healthz")
 def healthz():
-    # 依存リソースの簡易チェックを入れたければここで行う（例: モデル読み込み済みかなど）
+    # 依存リソースの簡易チェックを入れたければここで行う（例: モデル読み込み済みかなど） / Add simple dependency checks here if needed, such as whether the model is loaded.
     return {"status": "ok"}
 
-# Gradioを "/" にマウント（UIは "/", ヘルスチェックは "/healthz"）
+# Gradioを "/" にマウント（UIは "/", ヘルスチェックは "/healthz"） / Mount Gradio at "/". The UI is at "/", and the health check is at "/healthz".
 app = gr.mount_gradio_app(app, iface, path="/")
 
 if __name__ == "__main__":
-    # ALB などのヘルスチェック用に 0.0.0.0:80 で待受
+    # ALB などのヘルスチェック用に 0.0.0.0:80 で待受 / Listen on 0.0.0.0:80 for ALB and similar health checks.
     uvicorn.run(app, host="0.0.0.0", port=80)
