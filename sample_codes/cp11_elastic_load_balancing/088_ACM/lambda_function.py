@@ -5,7 +5,7 @@ def lambda_handler(event, context):
         "isBase64Encoded": False,
         "statusCode": 200,
         "statusDescription": "200 OK",
-        # "headers": {"content-type": "application/json"}, # multi-value-headerがOFFの場合
+        # "headers": {"content-type": "application/json"}, # multi-value-headerがOFFの場合 / headers for the case where multi-value headers are off
         "multiValueHeaders": {
             "Content-Type": ["application/json; charset=utf-8"]
         },

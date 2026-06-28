@@ -7,3 +7,8 @@
 # Terraform and cache directories
 .terraform/
 .cache/
+
+# Local Codex/agent workspace files
+.agents/
+.codex/
+tools/

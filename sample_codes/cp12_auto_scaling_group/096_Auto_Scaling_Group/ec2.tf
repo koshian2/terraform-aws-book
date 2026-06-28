@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -27,7 +27,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用セキュリティグループ（全Egress許可）----
+# ---- EC2用セキュリティグループ（全Egress許可）---- / Security group for EC2. Allow all egress.
 resource "aws_security_group" "web_instance" {
   name                   = "${var.vpc_name}-ec2-web-sg"
   description            = "No inbound; allow all egress for SSM over NAT"
@@ -67,7 +67,7 @@ locals {
   )
 }
 
-# ---- 起動テンプレート ----
+# ---- 起動テンプレート ---- / Launch template
 resource "aws_launch_template" "web" {
   name_prefix   = "${var.vpc_name}-lt-web-"
   image_id      = data.aws_ssm_parameter.ubuntu_2404_default_x86_64.value
@@ -77,9 +77,9 @@ resource "aws_launch_template" "web" {
     name = aws_iam_instance_profile.ssm_profile.name
   }
 
-  # サブネットはASG側で指定するため、ここでは指定しない
+  # サブネットはASG側で指定するため、ここでは指定しない / Do not set subnets here because the ASG sets them
   network_interfaces {
-    # パブリックIPは付与しない（プライベートサブネット運用前提）
+    # パブリックIPは付与しない（プライベートサブネット運用前提） / Do not assign public IPs. This assumes private subnet operation.
     associate_public_ip_address = false
     security_groups             = [aws_security_group.web_instance.id]
   }
@@ -88,7 +88,7 @@ resource "aws_launch_template" "web" {
     http_tokens = "required"
   }
 
-  # user_data は base64 エンコード文字列
+  # user_data は base64 エンコード文字列 / user_data is a Base64-encoded string
   user_data = base64encode(local.user_data)
 
   tag_specifications {
@@ -98,18 +98,18 @@ resource "aws_launch_template" "web" {
     }
   }
 
-  # 後続で $Latest を参照するので明示更新不要でもOK
+  # 後続で $Latest を参照するので明示更新不要でもOK / Later resources refer to $Latest, so explicit updates are not required
   update_default_version = true
 }
 
-# ---- Auto Scaling Group（2台起動 / 配置は private_subnet_ids から）----
+# ---- Auto Scaling Group（2台起動 / 配置は private_subnet_ids から）---- / Auto Scaling Group: start two instances and place them from private_subnet_ids
 resource "aws_autoscaling_group" "web" {
   name                      = "${var.vpc_name}-asg-web"
   max_size                  = 2
   min_size                  = 2
   desired_capacity          = 2
   vpc_zone_identifier       = module.vpc.private_subnet_ids
-  health_check_type         = "EC2"  # EC2ステータスチェックのみ
+  health_check_type         = "EC2"  # EC2ステータスチェックのみ / EC2 status checks only.
   health_check_grace_period = 300
 
   launch_template {
@@ -117,7 +117,7 @@ resource "aws_autoscaling_group" "web" {
     version = "$Latest"
   }
 
-  # 起動したEC2に Name タグを伝搬
+  # 起動したEC2に Name タグを伝搬 / Propagate the Name tag to launched EC2 instances
   tag {
     key                 = "Name"
     value               = "${var.vpc_name}-ec2-web"

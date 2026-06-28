@@ -40,13 +40,13 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
-  # IPv4のデフォルトルート
+  # IPv4のデフォルトルート / IPv4 default route
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  # IPv6のデフォルトルート
+  # IPv6のデフォルトルート / IPv6 default route
   route {
     ipv6_cidr_block = "::/0"
     gateway_id      = aws_internet_gateway.igw.id
@@ -57,7 +57,7 @@ resource "aws_route_table" "public" {
   }
 }
 
-# パブリック各サブネットに関連付け
+# パブリック各サブネットに関連付け / Associate with each public subnet
 resource "aws_route_table_association" "public_assoc" {
   count          = length(aws_subnet.public)
   subnet_id      = aws_subnet.public[count.index].id
@@ -72,7 +72,7 @@ resource "aws_subnet" "private" {
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.main.ipv6_cidr_block, 8, length(var.availability_zones) + count.index)
   availability_zone               = element(var.availability_zones, count.index)
   map_public_ip_on_launch         = false
-  assign_ipv6_address_on_creation = true # Egress Only IGWに流しコストを節約する際に有効
+  assign_ipv6_address_on_creation = true # Egress Only IGWに流しコストを節約する際に有効 / Enable this when sending IPv6 traffic through the egress-only internet gateway to save cost.
 
   enable_dns64                                   = false
   enable_resource_name_dns_a_record_on_launch    = true
@@ -83,7 +83,7 @@ resource "aws_subnet" "private" {
   }
 }
 
-# NATゲートウェイ用のElastic IP
+# NATゲートウェイ用のElastic IP / Elastic IP for the NAT gateway
 resource "aws_eip" "nat_eip" {
   domain = "vpc"
 
@@ -96,17 +96,17 @@ resource "aws_eip" "nat_eip" {
 resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat_eip.id
   subnet_id     = aws_subnet.public[0].id
-  depends_on    = [aws_internet_gateway.igw] # 先にIGW作成
+  depends_on    = [aws_internet_gateway.igw] # 先にIGW作成 / Create the internet gateway first
   tags = {
     Name = "${var.vpc_name}-natgw"
   }
 }
 
-# プライベートルートテーブル
+# プライベートルートテーブル / Private route table
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
-  # IPv4 デフォルトは NAT GW
+  # IPv4 デフォルトは NAT GW / The IPv4 default route uses the NAT gateway
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.this.id
@@ -117,7 +117,7 @@ resource "aws_route_table" "private" {
   }
 }
 
-# プライベート各サブネットに関連付け
+# プライベート各サブネットに関連付け / Associate with each private subnet
 resource "aws_route_table_association" "private_assoc" {
   count          = length(aws_subnet.private)
   subnet_id      = aws_subnet.private[count.index].id

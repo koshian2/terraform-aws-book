@@ -1,5 +1,5 @@
-# --- Athena用のS3バケットとワークグループだけ定義する ---
-# Athena クエリ結果用バケット
+# --- Athena用のS3バケットとワークグループだけ定義する --- / Define only the S3 bucket and workgroup for Athena.
+# Athena クエリ結果用バケット / Bucket for Athena query results.
 resource "random_string" "athena_suffix" {
   length  = 6
   lower   = true
@@ -13,7 +13,7 @@ resource "aws_s3_bucket" "athena_results" {
   force_destroy = true
 }
 
-# Athena ワークグループ（結果出力先のみ指定）
+# Athena ワークグループ（結果出力先のみ指定） / Athena workgroup with only the result output location set
 resource "aws_athena_workgroup" "vpcflow" {
   name = "${var.vpc_name}-wg"
 
@@ -27,7 +27,7 @@ resource "aws_athena_workgroup" "vpcflow" {
   force_destroy = true
 }
 
-# Athena データベース
+# Athena データベース / Athena database.
 resource "aws_athena_database" "network" {
   name   = "${replace(var.vpc_name, "-", "_")}_network_logs"
   bucket = aws_s3_bucket.athena_results.bucket

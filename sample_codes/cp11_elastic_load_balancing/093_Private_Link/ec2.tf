@@ -1,4 +1,4 @@
-# ---- 対象VPCのメタ（A/Bの最初のプライベートサブネット）----
+# ---- 対象VPCのメタ（A/Bの最初のプライベートサブネット）---- / Metadata for target VPCs, the first private subnet in A and B
 locals {
   vpcs = {
     a = {
@@ -32,7 +32,7 @@ data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# ---- SSM用 IAMロール/インスタンスプロフィール（A/B）----
+# ---- SSM用 IAMロール/インスタンスプロフィール（A/B）---- / IAM roles and instance profiles for SSM in A and B
 resource "aws_iam_role" "ssm_role" {
   for_each = local.vpcs
   name     = "${each.value.name}-ec2-ssm-role"
@@ -64,7 +64,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用セキュリティグループ（インバウンドは相方のVPCのHTTPを許可、全アウトバウンド許可）（A/B）----
+# ---- EC2用セキュリティグループ（インバウンドは相方のVPCのHTTPを許可、全アウトバウンド許可）（A/B）---- / Allow HTTP from the peer VPC and allow all outbound traffic.
 resource "aws_security_group" "ssm_instance" {
   for_each               = local.vpcs
   name                   = "${each.value.name}-ec2-ssm-sg"
@@ -92,7 +92,7 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   description       = "All IPv6 egress"
 }
 
-# NLBのSGを参照し、HTTPを許可
+# NLBのSGを参照し、HTTPを許可 / Reference the NLB security group and allow HTTP.
 resource "aws_vpc_security_group_ingress_rule" "a_allow_80_from_nlb_sg" {
   security_group_id            = aws_security_group.ssm_instance["a"].id
   ip_protocol                  = "tcp"
@@ -102,7 +102,7 @@ resource "aws_vpc_security_group_ingress_rule" "a_allow_80_from_nlb_sg" {
   description                  = "Allow TCP/80 only from NLB SG"
 }
 
-# ---- EC2（A/Bの最初のプライベートサブネット、公開IPなし、SSM接続）----
+# ---- EC2（A/Bの最初のプライベートサブネット、公開IPなし、SSM接続）---- / The first private subnet in A and B, with no public IP and SSM access.
 resource "aws_instance" "ssm" {
   for_each                    = local.vpcs
   ami                         = data.aws_ssm_parameter.al2023_default_x86_64.value

@@ -1,4 +1,4 @@
-# 信頼関係の定義
+# 信頼関係の定義 / Trust policy definition
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
@@ -12,19 +12,19 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-# ロールを作成
+# ロールを作成 / Create the role
 resource "aws_iam_role" "lambda_role" {
   name               = "LambdaBasicRole"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
-# AWSLambdaBasicExecutionRoleマネージドポリシーを追加
+# AWSLambdaBasicExecutionRoleマネージドポリシーを追加 / Add the AWSLambdaBasicExecutionRole managed policy
 resource "aws_iam_role_policy_attachment" "managed_policy" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Lambdaの作成
+# Lambdaの作成 / Create the Lambda function
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "lambda_function.py"

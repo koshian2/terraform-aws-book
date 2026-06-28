@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -27,7 +27,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用セキュリティグループ（インバウンド0、全Egress許可）----
+# ---- EC2用セキュリティグループ（インバウンド0、全Egress許可）---- / Security group for EC2. No inbound rules and all egress allowed.
 resource "aws_security_group" "ssm_instance" {
   name                   = "${var.vpc_name}-ec2-ssm-sg"
   description            = "No inbound; allow all egress for SSM over NAT"
@@ -57,7 +57,7 @@ data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# ---- EC2（プライベートサブネット。公開IPなし、SSM接続）----
+# ---- EC2（プライベートサブネット。公開IPなし、SSM接続）---- / EC2 in a private subnet, with no public IP and SSM access
 resource "aws_instance" "ssm" {
   ami                         = data.aws_ssm_parameter.al2023_default_x86_64.value
   instance_type               = "t3.micro"
@@ -75,7 +75,7 @@ resource "aws_instance" "ssm" {
   }
 }
 
-# インスタンスIDを出力
+# インスタンスIDを出力 / Output the instance ID
 output "ssm_instance_id" {
   description = "EC2 instance ID for SSM-connected host"
   value       = aws_instance.ssm.id

@@ -52,6 +52,28 @@
             margin-bottom: 2rem;
         }
 
+        .lang-switch {
+            display: inline-flex;
+            border: 1px solid #ddd;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .lang-switch button {
+            background: white;
+            border: 0;
+            color: #232f3e;
+            cursor: pointer;
+            font-weight: 700;
+            padding: 0.4rem 0.8rem;
+            min-width: 44px;
+        }
+
+        .lang-switch button.active {
+            background: #ff9900;
+        }
+
         .error-icon {
             font-size: 8rem;
             margin-bottom: 1rem;
@@ -346,6 +368,10 @@
 <body>
     <div class="error-container">
         <div class="logo">AWS Cloud Conference 2030</div>
+        <div class="lang-switch" aria-label="Language selector">
+            <button type="button" id="langJa" onclick="setLanguage('ja')" aria-label="日本語に切り替え">JA</button>
+            <button type="button" id="langEn" onclick="setLanguage('en')" aria-label="Switch to English">EN</button>
+        </div>
         
         <div class="error-icon" id="errorIcon">☁️</div>
         <div class="error-code" id="errorCode">404</div>
@@ -356,63 +382,170 @@
         </p>
 
         <div class="error-details">
-            <h3>💡 よくある原因</h3>
+            <h3 data-i18n="commonCauses">💡 よくある原因</h3>
             <ul>
-                <li>URLが間違っている、または古いリンクを使用している</li>
-                <li>ページが移動または削除された</li>
-                <li>ブックマークが古くなっている</li>
-                <li>一時的なサーバーエラーが発生している</li>
+                <li data-i18n="cause1">URLが間違っている、または古いリンクを使用している</li>
+                <li data-i18n="cause2">ページが移動または削除された</li>
+                <li data-i18n="cause3">ブックマークが古くなっている</li>
+                <li data-i18n="cause4">一時的なサーバーエラーが発生している</li>
             </ul>
         </div>
 
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="お探しの情報を検索...">
-            <button onclick="handleSearch()">検索</button>
+            <input type="text" id="searchInput" placeholder="お探しの情報を検索..." data-i18n-placeholder="searchPlaceholder">
+            <button onclick="handleSearch()" data-i18n="searchButton">検索</button>
         </div>
 
         <div class="button-group">
-            <a href="aws-conference.html" class="btn">ホームに戻る</a>
-            <a href="javascript:history.back()" class="btn btn-secondary">前のページに戻る</a>
-            <a href="javascript:location.reload()" class="btn btn-outline">ページを再読み込み</a>
+            <a href="./index.html" class="btn" data-i18n="homeButton">ホームに戻る</a>
+            <a href="javascript:history.back()" class="btn btn-secondary" data-i18n="backButton">前のページに戻る</a>
+            <a href="javascript:location.reload()" class="btn btn-outline" data-i18n="reloadButton">ページを再読み込み</a>
         </div>
 
         <div class="helpful-links">
-            <h3>🔗 役立つリンク</h3>
+            <h3 data-i18n="helpfulLinks">🔗 役立つリンク</h3>
             <div class="links-grid">
-                <a href="aws-conference.html#features" class="link-card">
+                <a href="./index.html#features" class="link-card">
                     <div class="icon">🎯</div>
-                    <div class="title">特徴</div>
-                    <div class="description">カンファレンスの特徴</div>
+                    <div class="title" data-i18n="featuresLink">特徴</div>
+                    <div class="description" data-i18n="featuresDescription">カンファレンスの特徴</div>
                 </a>
-                <a href="aws-conference.html#sessions" class="link-card">
+                <a href="./index.html#sessions" class="link-card">
                     <div class="icon">📅</div>
-                    <div class="title">セッション</div>
-                    <div class="description">プログラム一覧</div>
+                    <div class="title" data-i18n="sessionsLink">セッション</div>
+                    <div class="description" data-i18n="sessionsDescription">プログラム一覧</div>
                 </a>
-                <a href="aws-conference.html#venue" class="link-card">
+                <a href="./index.html#venue" class="link-card">
                     <div class="icon">📍</div>
-                    <div class="title">会場情報</div>
-                    <div class="description">アクセス・地図</div>
+                    <div class="title" data-i18n="venueLink">会場情報</div>
+                    <div class="description" data-i18n="venueDescription">アクセス・地図</div>
                 </a>
-                <a href="aws-conference.html#register" class="link-card">
+                <a href="./index.html#register" class="link-card">
                     <div class="icon">✍️</div>
-                    <div class="title">参加登録</div>
-                    <div class="description">今すぐ登録</div>
+                    <div class="title" data-i18n="registerLink">参加登録</div>
+                    <div class="description" data-i18n="registerDescription">今すぐ登録</div>
                 </a>
             </div>
         </div>
 
         <div class="support-info">
-            <h4>📧 お困りですか？</h4>
-            <p>問題が解決しない場合は、サポートチームまでお問い合わせください。</p>
+            <h4 data-i18n="supportTitle">📧 お困りですか？</h4>
+            <p data-i18n="supportText">問題が解決しない場合は、サポートチームまでお問い合わせください。</p>
             <p>
-                メール: <a href="mailto:info@awsconference.jp"><span class="__cf_email__">info@awsconference.jp</span></a><br>
-                電話: <a href="tel:03-1234-5678">03-1234-5678</a>（平日 10:00-18:00）
+                <span data-i18n="emailLabel">メール:</span> <a href="mailto:info@awsconference.jp"><span class="__cf_email__">info@awsconference.jp</span></a><br>
+                <span data-i18n="phoneLabel">電話:</span> <a href="tel:03-1234-5678">03-1234-5678</a><span data-i18n="phoneHours">（平日 10:00-18:00）</span>
             </p>
         </div>
     </div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
+        const translations = {
+            ja: {
+                pageTitle: 'エラー | AWS Cloud Conference 2030',
+                commonCauses: '💡 よくある原因',
+                cause1: 'URLが間違っている、または古いリンクを使用している',
+                cause2: 'ページが移動または削除された',
+                cause3: 'ブックマークが古くなっている',
+                cause4: '一時的なサーバーエラーが発生している',
+                searchPlaceholder: 'お探しの情報を検索...',
+                searchButton: '検索',
+                homeButton: 'ホームに戻る',
+                backButton: '前のページに戻る',
+                reloadButton: 'ページを再読み込み',
+                helpfulLinks: '🔗 役立つリンク',
+                featuresLink: '特徴',
+                featuresDescription: 'カンファレンスの特徴',
+                sessionsLink: 'セッション',
+                sessionsDescription: 'プログラム一覧',
+                venueLink: '会場情報',
+                venueDescription: 'アクセス・地図',
+                registerLink: '参加登録',
+                registerDescription: '今すぐ登録',
+                supportTitle: '📧 お困りですか？',
+                supportText: '問題が解決しない場合は、サポートチームまでお問い合わせください。',
+                emailLabel: 'メール:',
+                phoneLabel: '電話:',
+                phoneHours: '（平日 10:00-18:00）',
+                errors: {
+                    '403': ['🔒', '403', 'アクセスが拒否されました', 'このページへのアクセス権限がありません。<br>ログインが必要な場合は、ログインしてから再度お試しください。'],
+                    '500': ['⚠️', '500', 'サーバーエラー', 'サーバーで問題が発生しました。<br>しばらく時間をおいてから再度お試しください。'],
+                    '503': ['🔧', '503', 'メンテナンス中', '現在メンテナンス作業中です。<br>ご不便をおかけして申し訳ございません。しばらくお待ちください。'],
+                    network: ['📡', '', 'ネットワークエラー', 'インターネット接続を確認してください。<br>接続が安定してから再度お試しください。'],
+                    '404': ['☁️', '404', 'ページが見つかりません', 'お探しのページは移動または削除された可能性があります。<br>URLを確認するか、以下の方法でお探しの情報を見つけてください。']
+                },
+                searchAlert: query => `"${query}" を検索します。\n\n実際のサイトでは検索結果ページに移動します。`
+            },
+            en: {
+                pageTitle: 'Error | AWS Cloud Conference 2030',
+                commonCauses: '💡 Common causes',
+                cause1: 'The URL is wrong, or the link is old',
+                cause2: 'The page was moved or deleted',
+                cause3: 'The bookmark is outdated',
+                cause4: 'A temporary server error occurred',
+                searchPlaceholder: 'Search for information...',
+                searchButton: 'Search',
+                homeButton: 'Back to home',
+                backButton: 'Go back',
+                reloadButton: 'Reload page',
+                helpfulLinks: '🔗 Helpful links',
+                featuresLink: 'Highlights',
+                featuresDescription: 'Conference highlights',
+                sessionsLink: 'Sessions',
+                sessionsDescription: 'Program list',
+                venueLink: 'Venue',
+                venueDescription: 'Access and map',
+                registerLink: 'Registration',
+                registerDescription: 'Register now',
+                supportTitle: '📧 Need help?',
+                supportText: 'If the issue continues, contact the support team.',
+                emailLabel: 'Email:',
+                phoneLabel: 'Phone:',
+                phoneHours: ' (Weekdays 10:00-18:00)',
+                errors: {
+                    '403': ['🔒', '403', 'Access denied', 'You do not have permission to access this page.<br>If login is required, please log in and try again.'],
+                    '500': ['⚠️', '500', 'Server error', 'A problem occurred on the server.<br>Please wait a while and try again.'],
+                    '503': ['🔧', '503', 'Under maintenance', 'Maintenance is currently in progress.<br>We are sorry for the inconvenience. Please wait a while.'],
+                    network: ['📡', '', 'Network error', 'Please check your internet connection.<br>Try again after the connection is stable.'],
+                    '404': ['☁️', '404', 'Page not found', 'The page you are looking for may have moved or been deleted.<br>Please check the URL or use the options below to find the information you need.']
+                },
+                searchAlert: query => `Searching for "${query}".\n\nOn a real site, this would open the search results page.`
+            }
+        };
+
+        let currentLanguage = localStorage.getItem('awsConferenceLanguage') || 'ja';
+
+        function setLanguage(language) {
+            currentLanguage = translations[language] ? language : 'ja';
+            localStorage.setItem('awsConferenceLanguage', currentLanguage);
+            applyLanguage();
+            updateErrorDisplay();
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLanguage];
+            document.documentElement.lang = currentLanguage;
+            document.title = t.pageTitle;
+
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (t[key]) {
+                    element.textContent = t[key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-i18n-placeholder');
+                if (t[key]) {
+                    element.setAttribute('placeholder', t[key]);
+                }
+            });
+
+            document.getElementById('langJa').classList.toggle('active', currentLanguage === 'ja');
+            document.getElementById('langEn').classList.toggle('active', currentLanguage === 'en');
+            document.getElementById('langJa').setAttribute('aria-pressed', String(currentLanguage === 'ja'));
+            document.getElementById('langEn').setAttribute('aria-pressed', String(currentLanguage === 'en'));
+        }
+
         // URLパラメータからエラータイプを取得
         function getErrorType() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -426,42 +559,11 @@
             const errorCode = document.getElementById('errorCode');
             const errorTitle = document.getElementById('errorTitle');
             const errorMessage = document.getElementById('errorMessage');
-
-            switch(errorType) {
-                case '403':
-                    errorIcon.textContent = '🔒';
-                    errorCode.textContent = '403';
-                    errorTitle.textContent = 'アクセスが拒否されました';
-                    errorMessage.innerHTML = 'このページへのアクセス権限がありません。<br>ログインが必要な場合は、ログインしてから再度お試しください。';
-                    break;
-                
-                case '500':
-                    errorIcon.textContent = '⚠️';
-                    errorCode.textContent = '500';
-                    errorTitle.textContent = 'サーバーエラー';
-                    errorMessage.innerHTML = 'サーバーで問題が発生しました。<br>しばらく時間をおいてから再度お試しください。';
-                    break;
-                
-                case '503':
-                    errorIcon.textContent = '🔧';
-                    errorCode.textContent = '503';
-                    errorTitle.textContent = 'メンテナンス中';
-                    errorMessage.innerHTML = '現在メンテナンス作業中です。<br>ご不便をおかけして申し訳ございません。しばらくお待ちください。';
-                    break;
-                
-                case 'network':
-                    errorIcon.textContent = '📡';
-                    errorCode.textContent = '';
-                    errorTitle.textContent = 'ネットワークエラー';
-                    errorMessage.innerHTML = 'インターネット接続を確認してください。<br>接続が安定してから再度お試しください。';
-                    break;
-                
-                default: // 404
-                    errorIcon.textContent = '☁️';
-                    errorCode.textContent = '404';
-                    errorTitle.textContent = 'ページが見つかりません';
-                    errorMessage.innerHTML = 'お探しのページは移動または削除された可能性があります。<br>URLを確認するか、以下の方法でお探しの情報を見つけてください。';
-            }
+            const errorContent = translations[currentLanguage].errors[errorType] || translations[currentLanguage].errors['404'];
+            errorIcon.textContent = errorContent[0];
+            errorCode.textContent = errorContent[1];
+            errorTitle.textContent = errorContent[2];
+            errorMessage.innerHTML = errorContent[3];
         }
 
         // 検索処理
@@ -469,7 +571,7 @@
             const query = document.getElementById('searchInput').value.trim();
             if (query) {
                 // 実際のサイトでは検索ページにリダイレクト
-                alert(`"${query}" を検索します。\n\n実際のサイトでは検索結果ページに移動します。`);
+                alert(translations[currentLanguage].searchAlert(query));
                 // window.location.href = `search.html?q=${encodeURIComponent(query)}`;
             }
         }
@@ -482,6 +584,7 @@
         });
 
         // ページ読み込み時にエラー表示を更新
+        applyLanguage();
         updateErrorDisplay();
 
         // ランダムなクラウドアニメーション

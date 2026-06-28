@@ -1,4 +1,4 @@
-# セキュリティグループ本体
+# セキュリティグループ本体 / Security group resource
 resource "aws_security_group" "ssh_only" {
   name        = "${var.vpc_name}-ssh"
   description = "Allow SSH only from my IP; allow all IPv4 and IPv6 egress"
@@ -8,11 +8,11 @@ resource "aws_security_group" "ssh_only" {
     Name = "${var.vpc_name}-ssh-sg"
   }
 
-  # （任意）削除時にルールを全削除したい場合
+  # （任意）削除時にルールを全削除したい場合 / Optional: delete all rules when the security group is removed
   revoke_rules_on_delete = true
 }
 
-# Ingress: 自分のIPv4からのみSSH(22/tcp)
+# Ingress: 自分のIPv4からのみSSH(22/tcp) / Ingress: allow SSH (22/tcp) only from your IPv4 address
 resource "aws_vpc_security_group_ingress_rule" "ssh_from_my_ipv4" {
   security_group_id = aws_security_group.ssh_only.id
   description       = "SSH from my IPv4"
@@ -22,7 +22,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh_from_my_ipv4" {
   cidr_ipv4         = "${var.my_ip}/32"
 }
 
-# Egress: IPv4 全許可
+# Egress: IPv4 全許可 / Egress: allow all IPv4 traffic
 resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   security_group_id = aws_security_group.ssh_only.id
   description       = "Allow all IPv4 egress"
@@ -30,7 +30,7 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-# Egress: IPv6 全許可
+# Egress: IPv6 全許可 / Egress: allow all IPv6 traffic
 resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   security_group_id = aws_security_group.ssh_only.id
   description       = "Allow all IPv6 egress"
@@ -38,17 +38,17 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   cidr_ipv6         = "::/0"
 }
 
-# 既存のキーペアを取得
+# 既存のキーペアを取得 / Get the existing key pair
 data "aws_key_pair" "this" {
   key_name = "terraform_book_aws"
 }
 
-# AMI を SSM パラメータストアから取得
+# AMI を SSM パラメータストアから取得 / Get the AMI from SSM Parameter Store
 data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# EC2 用 IAM ロール
+# EC2 用 IAM ロール / IAM role for EC2
 resource "aws_iam_role" "ec2_s3_readonly_role" {
   name = "ec2-s3-readonly-role"
 
@@ -62,26 +62,26 @@ resource "aws_iam_role" "ec2_s3_readonly_role" {
   })
 }
 
-# S3 ReadOnly のマネージドポリシーをアタッチ
+# S3 ReadOnly のマネージドポリシーをアタッチ / Attach the S3 ReadOnly managed policy
 resource "aws_iam_role_policy_attachment" "ec2_s3_readonly_attach" {
   role       = aws_iam_role.ec2_s3_readonly_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
 
-# インスタンスプロファイル
+# インスタンスプロファイル / Instance profile
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "ec2-s3-readonly-profile"
   role = aws_iam_role.ec2_s3_readonly_role.name
 }
 
-# EC2 インスタンス（パブリックサブネットに 1 台）
+# EC2 インスタンス（パブリックサブネットに 1 台） / One EC2 instance in the public subnet
 resource "aws_instance" "public_ec2" {
   ami                    = data.aws_ssm_parameter.al2023_default_x86_64.value
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.ssh_only.id]
   key_name               = data.aws_key_pair.this.key_name
-  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name # ここを追加
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name # ここを追加 / Add this line
 
   associate_public_ip_address = true
   ipv6_address_count          = 1
@@ -95,7 +95,7 @@ resource "aws_instance" "public_ec2" {
   }
 }
 
-# DNS名を出力
+# DNS名を出力 / Output the DNS name
 output "public_instance_public_dns" {
   value = aws_instance.public_ec2.public_dns
 }

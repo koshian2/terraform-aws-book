@@ -1,4 +1,4 @@
-# --- ALB (internal) セキュリティグループ in web VPC ---
+# --- ALB (internal) セキュリティグループ in web VPC --- / Security group for internal ALB in the web VPC
 resource "aws_security_group" "alb" {
   name        = "${var.web_vpc_name}-alb-sg"
   description = "Internal ALB SG (only from VPN VPC)"
@@ -8,7 +8,7 @@ resource "aws_security_group" "alb" {
   }
 }
 
-# egress: 全許可
+# egress: 全許可 / egress: allow all traffic
 resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v4" {
   security_group_id = aws_security_group.alb.id
   ip_protocol       = "-1"
@@ -22,7 +22,7 @@ resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v6" {
   cidr_ipv6         = "::/0"
 }
 
-# ingress: HTTP 80(リダイレクト用) + HTTPS 443(実トラフィック) ← どちらも VPN VPC からのみ
+# ingress: HTTP 80(リダイレクト用) + HTTPS 443(実トラフィック) ← どちらも VPN VPC からのみ / Ingress: HTTP 80 for redirect and HTTPS 443 for real traffic. Both are only from the VPN VPC.
 resource "aws_vpc_security_group_ingress_rule" "alb_http_from_vpn_v4" {
   security_group_id = aws_security_group.alb.id
   ip_protocol       = "tcp"
@@ -57,11 +57,11 @@ resource "aws_vpc_security_group_ingress_rule" "alb_https_from_vpn_v6" {
   cidr_ipv6         = module.vpc_vpn.vpc_ipv6_cidr
 }
 
-# --- 内部ALB本体 ---
+# --- 内部ALB本体 --- / Internal ALB resource
 resource "aws_lb" "this" {
   name               = "${var.web_vpc_name}-alb"
   load_balancer_type = "application"
-  internal           = true # ← この一行でALBが「内部用」になる
+  internal           = true # ← この一行でALBが「内部用」になる / This one line makes the ALB internal
   security_groups    = [aws_security_group.alb.id]
   subnets            = module.vpc_web.private_subnet_ids
   ip_address_type    = var.enable_ipv6 ? "dualstack" : "ipv4"
@@ -88,7 +88,7 @@ resource "aws_lb_target_group_attachment" "web" {
   port             = 80
 }
 
-# --- ターゲットグループ（Lambda ターゲット） ---
+# --- ターゲットグループ（Lambda ターゲット） --- / Target group for Lambda targets
 resource "aws_lb_target_group" "api" {
   name        = "${var.web_vpc_name}-tg-lambda"
   target_type = "lambda"
@@ -110,7 +110,7 @@ resource "aws_lb_target_group_attachment" "api" {
   depends_on       = [aws_lambda_permission.allow_from_alb]
 }
 
-# --- HTTP(80) → HTTPS(443) へ恒久リダイレクト（HTTP） ---
+# --- HTTP(80) → HTTPS(443) へ恒久リダイレクト（HTTP） --- / Permanent redirect from HTTP (80) to HTTPS (443)
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.this.arn
   port              = 80
@@ -126,7 +126,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# --- リスナーとリスナールール（HTTPS） ---
+# --- リスナーとリスナールール（HTTPS） --- / HTTPS listener and listener rules
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.this.arn
   port              = 443
@@ -146,7 +146,7 @@ resource "aws_lb_listener" "https" {
   depends_on = [aws_acm_certificate_validation.this]
 }
 
-# web.intra.example.com → EC2のターゲットグループ（Web）
+# web.intra.example.com → EC2のターゲットグループ（Web） / web.intra.example.com goes to the EC2 target group for Web.
 resource "aws_lb_listener_rule" "host_web" {
   listener_arn = aws_lb_listener.https.arn
   priority     = 1
@@ -162,7 +162,7 @@ resource "aws_lb_listener_rule" "host_web" {
   }
 }
 
-# api.intra.example.com → Lambdaのターゲットグループ（API）
+# api.intra.example.com → Lambdaのターゲットグループ（API） / api.intra.example.com goes to the Lambda target group for API.
 resource "aws_lb_listener_rule" "host_api" {
   listener_arn = aws_lb_listener.https.arn
   priority     = 2

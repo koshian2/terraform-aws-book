@@ -1,4 +1,4 @@
-# 一意なバケット名が必要
+# 一意なバケット名が必要 / A unique bucket name is required
 resource "random_id" "suffix" {
   byte_length = 4
 }
@@ -42,7 +42,7 @@ resource "aws_s3_bucket_versioning" "app" {
   versioning_configuration { status = "Enabled" }
 }
 
-# 置きたい3ファイルをアップロード（ローカルの既存ファイルを利用）
+# 置きたい3ファイルをアップロード（ローカルの既存ファイルを利用） / Upload the three files to place, using existing local files
 resource "aws_s3_object" "requirements" {
   bucket       = aws_s3_bucket.app.bucket
   key          = "${local.app_prefix}/requirements.txt"

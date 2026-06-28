@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -19,7 +19,7 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# CloudWatch Agent 用の権限を追加
+# CloudWatch Agent 用の権限を追加 / Add permissions for CloudWatch Agent
 resource "aws_iam_role_policy_attachment" "cwagent" {
   role       = aws_iam_role.ssm_role.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
@@ -42,7 +42,7 @@ resource "aws_security_group" "web_instance" {
   tags                   = { Name = "${var.vpc_name}-ec2-web-sg" }
 }
 
-# Ingress: ALB SG → 80/TCP のみ許可（クライアント直アクセスは不可）
+# Ingress: ALB SG → 80/TCP のみ許可（クライアント直アクセスは不可） / Ingress: allow only 80/TCP from the ALB security group. Direct client access is not allowed.
 resource "aws_vpc_security_group_ingress_rule" "web_http_from_alb" {
   security_group_id            = aws_security_group.web_instance.id
   ip_protocol                  = "tcp"
@@ -52,7 +52,7 @@ resource "aws_vpc_security_group_ingress_rule" "web_http_from_alb" {
   description                  = "Allow HTTP from ALB"
 }
 
-# Egress: 全許可 (IPv4)
+# Egress: 全許可 (IPv4) / egress: allow all IPv4 traffic
 resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   security_group_id = aws_security_group.web_instance.id
   ip_protocol       = "-1"
@@ -60,7 +60,7 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   description       = "All IPv4 egress (via NAT GW)"
 }
 
-# Egress: 全許可 (IPv6) ※使う場合のみ
+# Egress: 全許可 (IPv6) ※使う場合のみ / egress: allow all IPv6 traffic only when used
 resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   count             = var.enable_ipv6 ? 1 : 0
   security_group_id = aws_security_group.web_instance.id
@@ -74,7 +74,7 @@ data "aws_ssm_parameter" "ubuntu_2404_default_x86_64" {
   name = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id"
 }
 
-# Cloudwatch Agent対応のユーザーデータに置き換え
+# Cloudwatch Agent対応のユーザーデータに置き換え / Replace with user data that supports CloudWatch Agent
 locals {
   user_data = templatefile(
     "${path.module}/../../apps/flask_load_test/cloudinit_cwagent.yaml.tftpl",
@@ -88,7 +88,7 @@ locals {
   )
 }
 
-# ---- 起動テンプレート ----
+# ---- 起動テンプレート ---- / Launch template
 resource "aws_launch_template" "web" {
   name_prefix   = "${var.vpc_name}-lt-web-"
   image_id      = data.aws_ssm_parameter.ubuntu_2404_default_x86_64.value
@@ -98,14 +98,14 @@ resource "aws_launch_template" "web" {
     name = aws_iam_instance_profile.ssm_profile.name
   }
 
-  # サブネットはASG側で指定するため、ここでは指定しない
+  # サブネットはASG側で指定するため、ここでは指定しない / Do not set subnets here because the ASG sets them
   network_interfaces {
-    # パブリックIPは付与しない（プライベートサブネット運用前提）
+    # パブリックIPは付与しない（プライベートサブネット運用前提） / Do not assign public IPs. This assumes private subnet operation.
     associate_public_ip_address = false
     security_groups             = [aws_security_group.web_instance.id]
   }
 
-  # メトリックへの反映が遅いので詳細モニタリングを有効化
+  # メトリックへの反映が遅いので詳細モニタリングを有効化 / Enable detailed monitoring because metrics can take time to appear
   monitoring {
     enabled = true
   }
@@ -114,7 +114,7 @@ resource "aws_launch_template" "web" {
     http_tokens = "required"
   }
 
-  # user_data は base64 エンコード文字列
+  # user_data は base64 エンコード文字列 / user_data is a Base64-encoded string
   user_data = base64encode(local.user_data)
 
   tag_specifications {
@@ -124,11 +124,11 @@ resource "aws_launch_template" "web" {
     }
   }
 
-  # 後続で $Latest を参照するので明示更新不要でもOK
+  # 後続で $Latest を参照するので明示更新不要でもOK / Later resources refer to $Latest, so explicit updates are not required
   update_default_version = true
 }
 
-# ---- Auto Scaling Group（TGに直接ぶら下げる）----
+# ---- Auto Scaling Group（TGに直接ぶら下げる）---- / Auto Scaling Group attached directly to the target group
 resource "aws_autoscaling_group" "web" {
   name                = "${var.vpc_name}-asg-web"
   max_size            = 4
@@ -139,7 +139,7 @@ resource "aws_autoscaling_group" "web" {
   health_check_type         = "ELB"
   health_check_grace_period = 300
 
-  # ここで TG に関連付け
+  # ここで TG に関連付け / Associate with the target group here
   target_group_arns = [aws_lb_target_group.web.arn]
 
   launch_template {
@@ -147,7 +147,7 @@ resource "aws_autoscaling_group" "web" {
     version = "$Latest"
   }
 
-  # （任意）ASGメトリクス可視化を有効化
+  # （任意）ASGメトリクス可視化を有効化 / Optional: enable ASG metrics for visibility
   metrics_granularity = "1Minute"
   enabled_metrics = [
     "GroupDesiredCapacity",
@@ -178,11 +178,11 @@ resource "aws_autoscaling_policy" "web_mem_target_tracking" {
   estimated_instance_warmup = 60
 
   target_tracking_configuration {
-    # 目標メモリ使用率（％）
+    # 目標メモリ使用率（％） / Target memory usage percentage.
     target_value = var.asg_target_mem_percent
 
     customized_metric_specification {
-      # 単一メトリクスをターゲットとして返す（expression なし）
+      # 単一メトリクスをターゲットとして返す（expression なし） / Return a single metric as the target, with no expression.
       metrics {
         label = "ASG average mem_used_percent"
         id    = "m1"
@@ -200,7 +200,7 @@ resource "aws_autoscaling_policy" "web_mem_target_tracking" {
           period = 60
         }
 
-        # この m1 をターゲットトラッキングの入力として使う
+        # この m1 をターゲットトラッキングの入力として使う / Use this m1 as the input for target tracking.
         return_data = true
       }
     }

@@ -17,12 +17,12 @@ variable "availability_zones" {
 }
 
 variable "enable_ipv6" {
-  description = "IPv6を有効にするか（dualstack時にtrue）"
+  description = "IPv6を有効にするか（dualstack時にtrue） / Whether to enable IPv6. Set true for dualstack."
   type        = bool
   default     = true
 }
 
 variable "alarm_email" {
-  description = "CloudWatch アラーム通知先メールアドレス"
+  description = "CloudWatch アラーム通知先メールアドレス / Email address for CloudWatch alarm notifications."
   type        = string
 }

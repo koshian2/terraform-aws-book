@@ -36,17 +36,17 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-# カスタムルートテーブルを作成し、インターネットへのルートを追加
+# カスタムルートテーブルを作成し、インターネットへのルートを追加 / Create a custom route table and add routes to the internet
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
-  # IPv4のデフォルトルート
+  # IPv4のデフォルトルート / IPv4 default route
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  # IPv6のデフォルトルート
+  # IPv6のデフォルトルート / IPv6 default route
   route {
     ipv6_cidr_block = "::/0"
     gateway_id      = aws_internet_gateway.igw.id
@@ -57,7 +57,7 @@ resource "aws_route_table" "public" {
   }
 }
 
-# 作成したルートテーブルをパブリックサブネットに関連付け
+# 作成したルートテーブルをパブリックサブネットに関連付け / Associate the created route table with the public subnet
 resource "aws_route_table_association" "public_assoc" {
   count          = length(aws_subnet.public)
   subnet_id      = aws_subnet.public[count.index].id
@@ -72,7 +72,7 @@ resource "aws_subnet" "private" {
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.main.ipv6_cidr_block, 8, length(var.availability_zones) + count.index)
   availability_zone               = element(var.availability_zones, count.index)
   map_public_ip_on_launch         = false
-  assign_ipv6_address_on_creation = true # Egress Only IGWに流しコストを節約する際に有効
+  assign_ipv6_address_on_creation = true # Egress Only IGWに流しコストを節約する際に有効 / Enable this when sending IPv6 traffic through the egress-only internet gateway to save cost.
 
   enable_dns64                                   = false
   enable_resource_name_dns_a_record_on_launch    = true

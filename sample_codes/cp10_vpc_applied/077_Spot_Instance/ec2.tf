@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -27,7 +27,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用セキュリティグループ（インバウンド0、全Egress許可）----
+# ---- EC2用セキュリティグループ（インバウンド0、全Egress許可）---- / Security group for EC2. No inbound rules and all egress allowed.
 resource "aws_security_group" "ssm_instance" {
   name                   = "${var.vpc_name}-ec2-ssm-sg"
   description            = "No inbound; allow all egress for SSM over NAT"
@@ -57,12 +57,12 @@ data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# ---- オプション：既存のキーペア（Session Manager本来は不要） ----
+# ---- オプション：既存のキーペア（Session Manager本来は不要） ---- / Optional: existing key pair. Session Manager itself does not require this.
 data "aws_key_pair" "this" {
   key_name = "terraform_book_aws"
 }
 
-# ---- EC2（プライベートサブネット。公開IPなし、SSM接続）----
+# ---- EC2（プライベートサブネット。公開IPなし、SSM接続）---- / EC2 in a private subnet, with no public IP and SSM access
 resource "aws_instance" "ssm" {
   ami                         = data.aws_ssm_parameter.al2023_default_x86_64.value
   instance_type               = "t3.small"
@@ -70,16 +70,16 @@ resource "aws_instance" "ssm" {
   vpc_security_group_ids      = [aws_security_group.ssm_instance.id]
   associate_public_ip_address = false
   iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
-  key_name                    = data.aws_key_pair.this.key_name # AWS ToolkitでのEC2接続ができない環境（例：Windows）で必要
+  key_name                    = data.aws_key_pair.this.key_name # AWS ToolkitでのEC2接続ができない環境（例：Windows）で必要 / Required in environments where EC2 connection with AWS Toolkit does not work, for example Windows.
 
-  # スポットインスタンス指定
+  # スポットインスタンス指定 / Spot instance setting.
   instance_market_options {
     market_type = "spot"
 
     spot_options {
       # 中断時の動作: terminate / stop / hibernate
       instance_interruption_behavior = "terminate"
-      # max_price を指定しない場合は、オンデマンド価格を上限として支払う設定になる（推奨）
+      # max_price を指定しない場合は、オンデマンド価格を上限として支払う設定になる（推奨） / When max_price is not set, the on-demand price is used as the upper limit. This is recommended.
       # max_price = "0.01"
     }
   }
@@ -100,7 +100,7 @@ resource "aws_instance" "ssm" {
   }
 }
 
-# インスタンスIDを出力
+# インスタンスIDを出力 / Output the instance ID
 output "ssm_instance_id" {
   description = "EC2 instance ID for SSM-connected host"
   value       = aws_instance.ssm.id

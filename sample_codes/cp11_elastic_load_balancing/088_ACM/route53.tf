@@ -1,10 +1,10 @@
-# --- Route 53 レコード ---
-# Route 53（既存のパブリックホストゾーンを参照）
+# --- Route 53 レコード --- / Route 53 records
+# Route 53（既存のパブリックホストゾーンを参照） / Route 53 using an existing public hosted zone
 data "aws_route53_zone" "public" {
   name         = var.public_zone_name
   private_zone = false
 }
-# ワイルドカードのA/AAAA DNSレコードを追加 (*.example.com)
+# ワイルドカードのA/AAAA DNSレコードを追加 (*.example.com) / Add wildcard A and AAAA DNS records (*.example.com)
 resource "aws_route53_record" "wild_a" {
   zone_id = data.aws_route53_zone.public.zone_id
   name    = "*.${var.public_zone_name}"
@@ -27,10 +27,10 @@ resource "aws_route53_record" "wild_aaaa" {
   }
 }
 
-# --- ACM 証明書（DNS 検証）: apex + wildcard を1枚で発行 ---
+# --- ACM 証明書（DNS 検証）: apex + wildcard を1枚で発行 --- / ACM certificate with DNS validation: issue one certificate for apex and wildcard
 resource "aws_acm_certificate" "this" {
-  domain_name               = var.public_zone_name          # 例: example.com
-  subject_alternative_names = ["*.${var.public_zone_name}"] # 例: *.example.com
+  domain_name               = var.public_zone_name          # 例: example.com / example: example.com
+  subject_alternative_names = ["*.${var.public_zone_name}"] # 例: *.example.com / example: *.example.com
   validation_method         = "DNS"
 
   lifecycle {
@@ -42,7 +42,7 @@ resource "aws_acm_certificate" "this" {
   }
 }
 
-# 検証用のDNSレコード（apex と wildcard の両方を作成）
+# 検証用のDNSレコード（apex と wildcard の両方を作成） / DNS records for validation, for both apex and wildcard
 resource "aws_route53_record" "cert_validation" {
   for_each = {
     for dvo in aws_acm_certificate.this.domain_validation_options :

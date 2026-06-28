@@ -1,11 +1,11 @@
 variable "vpc_cidr_block" {
-  description = "VPCのCIDRブロック"
+  description = "VPCのCIDRブロック / VPC CIDR block"
   type        = string
   default     = "10.32.0.0/16"
 }
 
 variable "vpc_name" {
-  description = "VPCの名前"
+  description = "VPCの名前 / VPC name"
   type        = string
   default     = "terraform-book-vpc"
 }

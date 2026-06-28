@@ -27,7 +27,7 @@ resource "aws_subnet" "public" {
   }
 }
 
-# インターネットゲートウェイ
+# インターネットゲートウェイ / Internet gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
@@ -40,13 +40,13 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
-  # IPv4のデフォルトルート
+  # IPv4のデフォルトルート / IPv4 default route
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  # IPv6のデフォルトルート
+  # IPv6のデフォルトルート / IPv6 default route
   route {
     ipv6_cidr_block = "::/0"
     gateway_id      = aws_internet_gateway.igw.id
@@ -57,7 +57,7 @@ resource "aws_route_table" "public" {
   }
 }
 
-# パブリック各サブネットに関連付け
+# パブリック各サブネットに関連付け / Associate with each public subnet
 resource "aws_route_table_association" "public_assoc" {
   count          = length(aws_subnet.public)
   subnet_id      = aws_subnet.public[count.index].id
@@ -72,7 +72,7 @@ resource "aws_subnet" "private" {
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.main.ipv6_cidr_block, 8, length(var.availability_zones) + count.index)
   availability_zone               = element(var.availability_zones, count.index)
   map_public_ip_on_launch         = false
-  assign_ipv6_address_on_creation = true # Egress Only IGWに流しコストを節約する際に有効
+  assign_ipv6_address_on_creation = true # Egress Only IGWに流しコストを節約する際に有効 / Enable this when sending IPv6 traffic through the egress-only internet gateway to save cost.
 
   enable_dns64                                   = false
   enable_resource_name_dns_a_record_on_launch    = true
@@ -83,7 +83,7 @@ resource "aws_subnet" "private" {
   }
 }
 
-# Egress-Only インターネットゲートウェイ
+# Egress-Only インターネットゲートウェイ / Egress-only internet gateway
 resource "aws_egress_only_internet_gateway" "eigw" {
   vpc_id = aws_vpc.main.id
   tags = {
@@ -91,7 +91,7 @@ resource "aws_egress_only_internet_gateway" "eigw" {
   }
 }
 
-# プライベートルートテーブル（ルートは何も定義しない）
+# プライベートルートテーブル（ルートは何も定義しない） / Private route table with no routes defined
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
@@ -100,14 +100,14 @@ resource "aws_route_table" "private" {
   }
 }
 
-# IPv6 デフォルトは EIGW（外向きのみ）
+# IPv6 デフォルトは EIGW（外向きのみ） / The IPv6 default route uses the egress-only internet gateway for outbound traffic only
 resource "aws_route" "private_ipv6_default" {
   route_table_id              = aws_route_table.private.id
   destination_ipv6_cidr_block = "::/0"
   egress_only_gateway_id      = aws_egress_only_internet_gateway.eigw.id
 }
 
-# fck-natの定義
+# fck-natの定義 / fck-nat definition
 module "fck-nat" {
   source  = "RaJiska/fck-nat/aws"
   version = ">= 1.4.0, < 2.0.0"
@@ -125,7 +125,7 @@ module "fck-nat" {
   }
 }
 
-# プライベート各サブネットに関連付け
+# プライベート各サブネットに関連付け / Associate with each private subnet
 resource "aws_route_table_association" "private_assoc" {
   count          = length(aws_subnet.private)
   subnet_id      = aws_subnet.private[count.index].id

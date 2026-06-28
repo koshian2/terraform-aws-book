@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -27,7 +27,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用セキュリティグループ（全Egress許可）----
+# ---- EC2用セキュリティグループ（全Egress許可）---- / Security group for EC2. Allow all egress.
 resource "aws_security_group" "web_instance" {
   name                   = "${var.vpc_name}-ec2-web-sg"
   description            = "No inbound; allow all egress for SSM over NAT"
@@ -57,7 +57,7 @@ data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# --- 起動テンプレート（元の aws_instance web を置き換え） ---
+# --- 起動テンプレート（元の aws_instance web を置き換え） --- / Launch template that replaces the original aws_instance web.
 resource "aws_launch_template" "web" {
   name_prefix   = "${var.vpc_name}-lt-web-"
   image_id      = data.aws_ssm_parameter.al2023_default_x86_64.value
@@ -67,9 +67,9 @@ resource "aws_launch_template" "web" {
     name = aws_iam_instance_profile.ssm_profile.name
   }
 
-  # サブネットはAuto Scaling Group側で指定するため、ここでは指定しない
+  # サブネットはAuto Scaling Group側で指定するため、ここでは指定しない / Do not set subnets here because they are set on the Auto Scaling Group side.
   network_interfaces {
-    # パブリックIPは付与しない（プライベートサブネット前提）
+    # パブリックIPは付与しない（プライベートサブネット前提） / Do not assign a public IP. This assumes private subnets.
     associate_public_ip_address = false
     security_groups             = [aws_security_group.web_instance.id]
   }
@@ -78,7 +78,7 @@ resource "aws_launch_template" "web" {
     http_tokens = "required"
   }
 
-  # user_data は base64 エンコード文字列
+  # user_data は base64 エンコード文字列 / user_data is a Base64-encoded string
   user_data = base64encode(<<-EOT
     #!/bin/bash -xe
     dnf -y update
@@ -96,19 +96,19 @@ resource "aws_launch_template" "web" {
     }
   }
 
-  # デフォルト版を更新する（任意）
+  # デフォルト版を更新する（任意） / Update the default version, optional
   update_default_version = true
 }
 
 
-# 起動テンプレートからEC2を立ち上げ
+# 起動テンプレートからEC2を立ち上げ / Launch EC2 from the launch template.
 resource "aws_instance" "web_from_lt" {
   launch_template {
     id      = aws_launch_template.web.id
-    version = "$Latest" # もしくは固定の番号
+    version = "$Latest" # もしくは固定の番号 / Or use a fixed version number.
   }
 
-  # 起動テンプレートの値を上書き可能
+  # 起動テンプレートの値を上書き可能 / Launch template values can be overridden.
   subnet_id                   = module.vpc.private_subnet_ids[0]
   vpc_security_group_ids      = [aws_security_group.web_instance.id]
   associate_public_ip_address = false

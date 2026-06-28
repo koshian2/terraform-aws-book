@@ -1,4 +1,4 @@
-# --- ALB用セキュリティグループ（HTTPを外部から受けるだけ） ---
+# --- ALB用セキュリティグループ（HTTPを外部から受けるだけ） --- / Security group for ALB. It only receives HTTP from outside.
 resource "aws_security_group" "alb" {
   name        = "${var.vpc_name}-alb-sg"
   description = "ALB security group"
@@ -9,14 +9,14 @@ resource "aws_security_group" "alb" {
   }
 }
 
-# egress: 全許可 (IPv4)
+# egress: 全許可 (IPv4) / egress: allow all IPv4 traffic
 resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v4" {
   security_group_id = aws_security_group.alb.id
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-# egress: 全許可 (IPv6) ※使う場合のみ
+# egress: 全許可 (IPv6) ※使う場合のみ / egress: allow all IPv6 traffic only when used
 resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v6" {
   count             = var.enable_ipv6 ? 1 : 0
   security_group_id = aws_security_group.alb.id
@@ -33,7 +33,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http_v4" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-# ingress: HTTP (IPv6) ※使う場合のみ
+# ingress: HTTP (IPv6) ※使う場合のみ / ingress: HTTP (IPv6) Note: only when used
 resource "aws_vpc_security_group_ingress_rule" "alb_http_v6" {
   count             = var.enable_ipv6 ? 1 : 0
   security_group_id = aws_security_group.alb.id
@@ -43,11 +43,11 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http_v6" {
   cidr_ipv6         = "::/0"
 }
 
-# --- ALB本体 ---
+# --- ALB本体 --- / ALB resource
 resource "aws_lb" "this" {
   name               = "${var.vpc_name}-alb"
   load_balancer_type = "application"
-  internal           = false # パブリックALB
+  internal           = false # パブリックALB / Public ALB
   security_groups    = [aws_security_group.alb.id]
   subnets            = module.vpc.public_subnet_ids
   ip_address_type    = var.enable_ipv6 ? "dualstack" : "ipv4"
@@ -69,23 +69,23 @@ resource "aws_lb_target_group" "web" {
   tags = { Name = "${var.vpc_name}-web-tg" }
 }
 
-# EC2 を ターゲットグループ に登録
+# EC2 を ターゲットグループ に登録 / Register EC2 with the target group
 resource "aws_lb_target_group_attachment" "web" {
   target_group_arn = aws_lb_target_group.web.arn
   target_id        = aws_instance.web.id
   port             = 80
 }
 
-# --- ターゲットグループ（Lambda ターゲット） ---
+# --- ターゲットグループ（Lambda ターゲット） --- / Target group for Lambda targets
 resource "aws_lb_target_group" "api" {
   name        = "${var.vpc_name}-tg-lambda"
   target_type = "lambda"
 
-  # マルチバリュー・ヘッダを有効化したい場合は true（任意）
+  # マルチバリュー・ヘッダを有効化したい場合は true（任意） / Set true if you want to enable multi-value headers. Optional.
   lambda_multi_value_headers_enabled = true
 }
 
-# ALB から Lambda を呼び出す許可
+# ALB から Lambda を呼び出す許可 / Allow ALB to invoke Lambda
 resource "aws_lambda_permission" "allow_from_alb" {
   statement_id  = "AllowExecutionFromALB"
   action        = "lambda:InvokeFunction"
@@ -94,14 +94,14 @@ resource "aws_lambda_permission" "allow_from_alb" {
   source_arn    = aws_lb_target_group.api.arn
 }
 
-# Lambda 関数をターゲットグループに登録
+# Lambda 関数をターゲットグループに登録 / Register the Lambda function with the target group
 resource "aws_lb_target_group_attachment" "api" {
   target_group_arn = aws_lb_target_group.api.arn
   target_id        = aws_lambda_function.api.arn
   depends_on       = [aws_lambda_permission.allow_from_alb]
 }
 
-# --- リスナーとリスナールール（HTTP） ---
+# --- リスナーとリスナールール（HTTP） --- / HTTP listener and listener rules
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.this.arn
   port              = 80
@@ -117,7 +117,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# web.example.com → EC2のターゲットグループ（Web）
+# web.example.com → EC2のターゲットグループ（Web） / web.example.com goes to the EC2 target group for Web
 resource "aws_lb_listener_rule" "host_web" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 1
@@ -133,7 +133,7 @@ resource "aws_lb_listener_rule" "host_web" {
   }
 }
 
-# api.example.com → Lambdaのターゲットグループ（API）
+# api.example.com → Lambdaのターゲットグループ（API） / api.example.com goes to the Lambda target group for API
 resource "aws_lb_listener_rule" "host_api" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 2
@@ -148,14 +148,14 @@ resource "aws_lb_listener_rule" "host_api" {
   }
 }
 
-# --- Route 53 レコード ---
-# Route 53（既存のパブリックホストゾーンを参照）
+# --- Route 53 レコード --- / Route 53 records
+# Route 53（既存のパブリックホストゾーンを参照） / Route 53 using an existing public hosted zone
 data "aws_route53_zone" "public" {
   name         = var.public_zone_name
   private_zone = false
 }
 
-# ワイルドカードのA/AAAA DNSレコードを追加 (*.example.com)
+# ワイルドカードのA/AAAA DNSレコードを追加 (*.example.com) / Add wildcard A and AAAA DNS records (*.example.com)
 resource "aws_route53_record" "wild_a" {
   zone_id = data.aws_route53_zone.public.zone_id
   name    = "*.${var.public_zone_name}"

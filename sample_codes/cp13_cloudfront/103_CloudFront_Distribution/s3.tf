@@ -1,5 +1,5 @@
 #---------------------------------------
-# ランダムサフィックスでバケット名を一意化
+# ランダムサフィックスでバケット名を一意化 / Make the bucket name unique with a random suffix
 #---------------------------------------
 resource "random_id" "bucket" {
   byte_length = 4

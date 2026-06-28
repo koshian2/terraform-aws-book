@@ -8,7 +8,7 @@ module "vpc" {
   assign_ipv6 = var.enable_ipv6
 }
 
-# --- ALB用セキュリティグループ（HTTPを外部から受けるだけ） ---
+# --- ALB用セキュリティグループ（HTTPを外部から受けるだけ） --- / Security group for ALB. It only receives HTTP from outside.
 resource "aws_security_group" "alb" {
   name        = "${var.vpc_name}-alb-sg"
   description = "ALB security group"
@@ -19,14 +19,14 @@ resource "aws_security_group" "alb" {
   }
 }
 
-# egress: 全許可 (IPv4)
+# egress: 全許可 (IPv4) / egress: allow all IPv4 traffic
 resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v4" {
   security_group_id = aws_security_group.alb.id
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-# egress: 全許可 (IPv6) ※使う場合のみ
+# egress: 全許可 (IPv6) ※使う場合のみ / egress: allow all IPv6 traffic only when used
 resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v6" {
   count             = var.enable_ipv6 ? 1 : 0
   security_group_id = aws_security_group.alb.id
@@ -43,7 +43,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http_v4" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-# ingress: HTTP (IPv6) ※使う場合のみ
+# ingress: HTTP (IPv6) ※使う場合のみ / ingress: HTTP (IPv6) Note: only when used
 resource "aws_vpc_security_group_ingress_rule" "alb_http_v6" {
   count             = var.enable_ipv6 ? 1 : 0
   security_group_id = aws_security_group.alb.id
@@ -53,11 +53,11 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http_v6" {
   cidr_ipv6         = "::/0"
 }
 
-# --- ALB本体 ---
+# --- ALB本体 --- / ALB resource
 resource "aws_lb" "this" {
   name               = "${var.vpc_name}-alb"
   load_balancer_type = "application"
-  internal           = false # パブリックALB
+  internal           = false # パブリックALB / Public ALB
   security_groups    = [aws_security_group.alb.id]
   subnets            = module.vpc.public_subnet_ids
   ip_address_type    = var.enable_ipv6 ? "dualstack" : "ipv4"
@@ -67,7 +67,7 @@ resource "aws_lb" "this" {
   }
 }
 
-# 任意：ALBのDNS名を出力
+# 任意：ALBのDNS名を出力 / Optional: output the ALB DNS name
 output "alb_dns_name" {
   value       = aws_lb.this.dns_name
   description = "ALB DNS name"

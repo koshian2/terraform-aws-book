@@ -1,14 +1,14 @@
 data "aws_route53_zone" "this" {
-  name         = var.hosted_zone_name # 例: "example.com."
+  name         = var.hosted_zone_name # 例: "example.com." / example: "example.com."
   private_zone = false
 }
 
-# ALB を指すオリジン FQDN（例: origin.example.com）
+# ALB を指すオリジン FQDN（例: origin.example.com） / Origin FQDN that points to ALB, for example origin.example.com
 locals {
   origin_fqdn = "${var.origin_subdomain}.${trimsuffix(var.hosted_zone_name, ".")}"
 }
 
-# A/AAAA (ALIAS) で ALB を指す
+# A/AAAA (ALIAS) で ALB を指す / Point to the ALB with A/AAAA alias records.
 resource "aws_route53_record" "origin_alias_a" {
   zone_id = data.aws_route53_zone.this.zone_id
   name    = local.origin_fqdn
@@ -31,7 +31,7 @@ resource "aws_route53_record" "origin_alias_aaaa" {
   }
 }
 
-# CloudFront に向ける viewer 用ドメイン (例: web.example.com)
+# CloudFront に向ける viewer 用ドメイン (例: web.example.com) / Viewer domain pointing to CloudFront, for example web.example.com.
 # var.viewer_domain_name = "web.example.com"
 resource "aws_route53_record" "viewer_alias_a" {
   zone_id = data.aws_route53_zone.this.zone_id

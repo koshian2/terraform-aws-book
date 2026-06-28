@@ -1,4 +1,4 @@
-# --- ALB用SG（CloudFront からのみ80を許可）---
+# --- ALB用SG（CloudFront からのみ80を許可）--- / Security group for ALB. Allow port 80 only from CloudFront.
 data "aws_ec2_managed_prefix_list" "cloudfront_origin_facing" {
   name = "com.amazonaws.global.cloudfront.origin-facing"
 }
@@ -10,7 +10,7 @@ resource "aws_security_group" "alb" {
   tags        = { Name = "${var.vpc_name}-alb-sg" }
 }
 
-# Ingress: CloudFront のオリジン向けIPから80のみ
+# Ingress: CloudFront のオリジン向けIPから80のみ / Ingress: only port 80 from CloudFront origin-facing IPs
 resource "aws_vpc_security_group_ingress_rule" "alb_from_cloudfront" {
   security_group_id = aws_security_group.alb.id
   ip_protocol       = "tcp"
@@ -19,7 +19,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_from_cloudfront" {
   prefix_list_id    = data.aws_ec2_managed_prefix_list.cloudfront_origin_facing.id
 }
 
-# Egress: 全許可 (IPv4)
+# Egress: 全許可 (IPv4) / egress: allow all IPv4 traffic
 resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v4" {
   security_group_id = aws_security_group.alb.id
   ip_protocol       = "-1"
@@ -27,7 +27,7 @@ resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v4" {
   description       = "All IPv4 egress"
 }
 
-# Egress: 全許可 (IPv6)
+# Egress: 全許可 (IPv6) / egress: allow all IPv6 traffic
 resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v6" {
   security_group_id = aws_security_group.alb.id
   ip_protocol       = "-1"
@@ -35,7 +35,7 @@ resource "aws_vpc_security_group_egress_rule" "alb_all_egress_v6" {
   description       = "All IPv6 egress"
 }
 
-# --- EC2(ASG)側SG：ALBからのHTTPのみ受ける（外向けは従来通り）---
+# --- EC2(ASG)側SG：ALBからのHTTPのみ受ける（外向けは従来通り）--- / Security group on the EC2 (ASG) side. Receive only HTTP from ALB. Outbound stays as before.
 resource "aws_vpc_security_group_ingress_rule" "web_from_alb" {
   security_group_id            = aws_security_group.web_instance.id
   ip_protocol                  = "tcp"
@@ -44,7 +44,7 @@ resource "aws_vpc_security_group_ingress_rule" "web_from_alb" {
   referenced_security_group_id = aws_security_group.alb.id
 }
 
-# --- ターゲットグループ（インスタンス登録）---
+# --- ターゲットグループ（インスタンス登録）--- / Target group with instance registration
 resource "aws_lb_target_group" "web" {
   name        = "${var.vpc_name}-tg-web"
   port        = 80
@@ -52,10 +52,10 @@ resource "aws_lb_target_group" "web" {
   vpc_id      = module.vpc.vpc_id
   target_type = "instance"
 
-  # スティッキーセッション
+  # スティッキーセッション / Sticky sessions
   stickiness {
-    type            = "lb_cookie" # Application Load Balancer のLBクッキー
-    cookie_duration = 3600        # 秒（例: 1時間）
+    type            = "lb_cookie" # Application Load Balancer のLBクッキー / Load balancer cookie for Application Load Balancer
+    cookie_duration = 3600        # 秒（例: 1時間） / Seconds, for example 1 hour
     enabled         = true
   }
 
@@ -72,7 +72,7 @@ resource "aws_lb_target_group" "web" {
   deregistration_delay = 30
 }
 
-# --- ALB（インターネット向け / パブリックサブネット）---
+# --- ALB（インターネット向け / パブリックサブネット）--- / ALB (internet-facing / public subnet)
 resource "aws_lb" "alb" {
   name               = "${var.vpc_name}-alb"
   load_balancer_type = "application"
@@ -84,13 +84,13 @@ resource "aws_lb" "alb" {
   tags = { Name = "${var.vpc_name}-alb" }
 }
 
-# --- HTTPリスナー (80) ：デフォルトは 403 応答に ---
+# --- HTTPリスナー (80) ：デフォルトは 403 応答に --- / HTTP listener (80): return 403 by default
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
 
-  # デフォルトは403を返す（秘密ヘッダーが無いアクセスはここに落ちる）
+  # デフォルトは403を返す（秘密ヘッダーが無いアクセスはここに落ちる） / Return 403 by default. Access without the secret header reaches this rule.
   default_action {
     type = "fixed-response"
     fixed_response {
@@ -101,7 +101,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# --- 秘密ヘッダー一致時のみ フォワードする ルール（優先度1）---
+# --- 秘密ヘッダー一致時のみ フォワードする ルール（優先度1）--- / Rule that forwards only when the secret header matches, priority 1
 resource "aws_lb_listener_rule" "allow_from_cloudfront_with_secret" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 1

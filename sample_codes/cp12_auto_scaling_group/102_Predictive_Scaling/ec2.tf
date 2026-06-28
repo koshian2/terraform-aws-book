@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -36,7 +36,7 @@ resource "aws_security_group" "web_instance" {
   tags                   = { Name = "${var.vpc_name}-ec2-web-sg" }
 }
 
-# Ingress: ALB SG → 80/TCP のみ許可（クライアント直アクセスは不可）
+# Ingress: ALB SG → 80/TCP のみ許可（クライアント直アクセスは不可） / Ingress: allow only 80/TCP from the ALB security group. Direct client access is not allowed.
 resource "aws_vpc_security_group_ingress_rule" "web_http_from_alb" {
   security_group_id            = aws_security_group.web_instance.id
   ip_protocol                  = "tcp"
@@ -46,7 +46,7 @@ resource "aws_vpc_security_group_ingress_rule" "web_http_from_alb" {
   description                  = "Allow HTTP from ALB"
 }
 
-# Egress: 全許可 (IPv4)
+# Egress: 全許可 (IPv4) / egress: allow all IPv4 traffic
 resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   security_group_id = aws_security_group.web_instance.id
   ip_protocol       = "-1"
@@ -54,7 +54,7 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   description       = "All IPv4 egress (via NAT GW)"
 }
 
-# Egress: 全許可 (IPv6) ※使う場合のみ
+# Egress: 全許可 (IPv6) ※使う場合のみ / egress: allow all IPv6 traffic only when used
 resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   count             = var.enable_ipv6 ? 1 : 0
   security_group_id = aws_security_group.web_instance.id
@@ -78,7 +78,7 @@ locals {
   )
 }
 
-# ---- 起動テンプレート ----
+# ---- 起動テンプレート ---- / Launch template
 resource "aws_launch_template" "web" {
   name_prefix   = "${var.vpc_name}-lt-web-"
   image_id      = data.aws_ssm_parameter.ubuntu_2404_default_x86_64.value
@@ -88,9 +88,9 @@ resource "aws_launch_template" "web" {
     name = aws_iam_instance_profile.ssm_profile.name
   }
 
-  # サブネットはASG側で指定するため、ここでは指定しない
+  # サブネットはASG側で指定するため、ここでは指定しない / Do not set subnets here because the ASG sets them
   network_interfaces {
-    # パブリックIPは付与しない（プライベートサブネット運用前提）
+    # パブリックIPは付与しない（プライベートサブネット運用前提） / Do not assign public IPs. This assumes private subnet operation.
     associate_public_ip_address = false
     security_groups             = [aws_security_group.web_instance.id]
   }
@@ -99,7 +99,7 @@ resource "aws_launch_template" "web" {
     http_tokens = "required"
   }
 
-  # user_data は base64 エンコード文字列
+  # user_data は base64 エンコード文字列 / user_data is a Base64-encoded string
   user_data = base64encode(local.user_data)
 
   tag_specifications {
@@ -109,11 +109,11 @@ resource "aws_launch_template" "web" {
     }
   }
 
-  # 後続で $Latest を参照するので明示更新不要でもOK
+  # 後続で $Latest を参照するので明示更新不要でもOK / Later resources refer to $Latest, so explicit updates are not required
   update_default_version = true
 }
 
-# ---- Auto Scaling Group（TGに直接ぶら下げる）----
+# ---- Auto Scaling Group（TGに直接ぶら下げる）---- / Auto Scaling Group attached directly to the target group
 resource "aws_autoscaling_group" "web" {
   name                = "${var.vpc_name}-asg-web"
   max_size            = 4
@@ -124,7 +124,7 @@ resource "aws_autoscaling_group" "web" {
   health_check_type         = "ELB"
   health_check_grace_period = 300
 
-  # ここで TG に関連付け
+  # ここで TG に関連付け / Associate with the target group here
   target_group_arns = [aws_lb_target_group.web.arn]
 
   launch_template {
@@ -132,7 +132,7 @@ resource "aws_autoscaling_group" "web" {
     version = "$Latest"
   }
 
-  # （任意）ASGメトリクス可視化を有効化
+  # （任意）ASGメトリクス可視化を有効化 / Optional: enable ASG metrics for visibility
   metrics_granularity = "1Minute"
   enabled_metrics = [
     "GroupDesiredCapacity",
@@ -156,7 +156,7 @@ resource "aws_autoscaling_group" "web" {
   }
 }
 
-# ---- 予測スケーリング（CPUベース）----
+# ---- 予測スケーリング（CPUベース）---- / Predictive scaling based on CPU
 resource "aws_autoscaling_policy" "web_predictive_cpu" {
   name                   = "${var.vpc_name}-asg-web-predictive-cpu"
   policy_type            = "PredictiveScaling"
@@ -165,8 +165,8 @@ resource "aws_autoscaling_policy" "web_predictive_cpu" {
   predictive_scaling_configuration {
     mode                         = "ForecastAndScale"
     scheduling_buffer_time       = 300
-    max_capacity_breach_behavior = "IncreaseMaxCapacity" # ← Max超えを許可
-    max_capacity_buffer          = 10                    # 例: 予測がMaxに近い時に+10%まで上乗せ
+    max_capacity_breach_behavior = "IncreaseMaxCapacity" # ← Max超えを許可 / Allow capacity to exceed Max
+    max_capacity_buffer          = 10                    # 例: 予測がMaxに近い時に+10%まで上乗せ / example: Add up to 10 percent when the forecast is near Max
 
     metric_specification {
       target_value = var.asg_target_cpu_percent
@@ -182,14 +182,14 @@ resource "aws_autoscaling_policy" "web_cpu_target_tracking" {
   policy_type            = "TargetTrackingScaling"
   autoscaling_group_name = aws_autoscaling_group.web.name
 
-  # 起動直後のノイズで再スケールしにくくする（ASGのhealth_check_grace_period=300とも相性◎）
+  # 起動直後のノイズで再スケールしにくくする（ASGのhealth_check_grace_period=300とも相性◎） / Reduce rescaling caused by noise just after startup. This works well with ASG health_check_grace_period = 300.
   estimated_instance_warmup = 60
 
   target_tracking_configuration {
     predefined_metric_specification {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
-    target_value     = var.asg_target_cpu_percent # 例: 50
-    disable_scale_in = false                      # スケールインも許可
+    target_value     = var.asg_target_cpu_percent # 例: 50 / example: 50
+    disable_scale_in = false                      # スケールインも許可 / Allow scale-in
   }
 }

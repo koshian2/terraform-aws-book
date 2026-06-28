@@ -22,7 +22,7 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# OS (Arch) => SSM パラメータ名
+# OS (Arch) => SSM パラメータ名 / OS and architecture to SSM parameter name
 locals {
   ami_params = {
     "Ubuntu 24.04 (x86_64)"      = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id"
@@ -37,11 +37,11 @@ data "aws_ssm_parameter" "ami" {
   name     = each.value
 }
 
-# 出力: "OS (Arch)" => AMI ID
+# 出力: "OS (Arch)" => AMI ID / Output: OS and architecture to AMI ID
 output "ami_ids" {
   description = "Map of \"OS (Arch)\" => AMI ID"
   value = {
     for key, param in data.aws_ssm_parameter.ami :
-    key => nonsensitive(param.value) # プロバイダ側で常に sensitive 扱い。公開AMI IDなのでOK
+    key => nonsensitive(param.value) # プロバイダ側で常に sensitive 扱い。公開AMI IDなのでOK / The provider always treats this as sensitive. It is OK because this is a public AMI ID.
   }
 }

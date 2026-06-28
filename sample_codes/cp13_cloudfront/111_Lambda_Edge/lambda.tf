@@ -1,5 +1,5 @@
 #========================================
-# Lambda@Edge 用 ZIP 作成
+# Lambda@Edge 用 ZIP 作成 / Create a ZIP file for Lambda@Edge.
 #========================================
 data "archive_file" "lambda_edge_zip" {
   type        = "zip"
@@ -8,7 +8,7 @@ data "archive_file" "lambda_edge_zip" {
 }
 
 #========================================
-# Lambda@Edge 用 IAM ロール
+# Lambda@Edge 用 IAM ロール / IAM role for Lambda@Edge.
 #========================================
 resource "aws_iam_role" "lambda_edge" {
   name = "${var.vpc_name}-lambda-edge-role"
@@ -36,7 +36,7 @@ resource "aws_iam_role_policy_attachment" "lambda_edge_basic" {
 }
 
 #========================================
-# Lambda@Edge 関数本体（us-east-1）
+# Lambda@Edge 関数本体（us-east-1） / Lambda@Edge function resource in us-east-1.
 #========================================
 resource "aws_lambda_function" "edge_error_redirect" {
   provider = aws.us_east_1
@@ -48,9 +48,9 @@ resource "aws_lambda_function" "edge_error_redirect" {
   source_code_hash = data.archive_file.lambda_edge_zip.output_base64sha256
 
   role    = aws_iam_role.lambda_edge.arn
-  handler = "lambda_edge.lambda_handler" # lambda_edge.py の lambda_handler
+  handler = "lambda_edge.lambda_handler" # lambda_edge.py の lambda_handler / lambda_handler in lambda_edge.py.
   runtime = "python3.12"
 
-  # Lambda@Edge はバージョン付き ARN が必要なので publish = true
+  # Lambda@Edge はバージョン付き ARN が必要なので publish = true / Lambda@Edge requires a versioned ARN, so set publish = true.
   publish = true
 }

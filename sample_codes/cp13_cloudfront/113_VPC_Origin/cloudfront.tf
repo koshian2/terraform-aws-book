@@ -1,4 +1,4 @@
-# ---- マネージドポリシー（キャッシュ無効／最適化）----
+# ---- マネージドポリシー（キャッシュ無効／最適化）---- / Managed policies for caching disabled and optimized caching
 data "aws_cloudfront_cache_policy" "caching_disabled" {
   name = "Managed-CachingDisabled"
 }
@@ -7,8 +7,8 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
-# ---- ALBスティッキー用クッキーをオリジンへ送るポリシー ----
-# ※ キャッシュキーには含めない（= Cache Policy 側で制御）
+# ---- ALBスティッキー用クッキーをオリジンへ送るポリシー ---- / Policy that sends the ALB sticky cookie to the origin
+# ※ キャッシュキーには含めない（= Cache Policy 側で制御） / Note: Do not include it in the cache key. Control that in the cache policy.
 resource "aws_cloudfront_origin_request_policy" "alb_sticky_cookies" {
   name = "${var.vpc_name}-alb-sticky-cookies"
 
@@ -23,7 +23,7 @@ resource "aws_cloudfront_origin_request_policy" "alb_sticky_cookies" {
     header_behavior = "none"
   }
 
-  # クエリは必要に応じて
+  # クエリは必要に応じて / Add query strings as needed
   query_strings_config {
     query_string_behavior = "all"
   }
@@ -34,14 +34,14 @@ resource "aws_cloudfront_vpc_origin" "alb" {
   vpc_origin_endpoint_config {
     name = "${var.vpc_name}-alb-vpc-origin"
 
-    # VPCオリジンのターゲットになる internal ALB
+    # VPCオリジンのターゲットになる internal ALB / Internal ALB used as the VPC origin target
     arn = aws_lb.alb.arn
 
     http_port              = 80
     https_port             = 443
-    origin_protocol_policy = "http-only" # 今はHTTPのみならこれでOK
+    origin_protocol_policy = "http-only" # 今はHTTPのみならこれでOK / This is OK when you use only HTTP for now
 
-    origin_ssl_protocols { # HTTPS用の設定
+    origin_ssl_protocols { # HTTPS用の設定 / Settings for HTTPS
       quantity = 1
       items    = ["TLSv1.2"]
     }
@@ -49,7 +49,7 @@ resource "aws_cloudfront_vpc_origin" "alb" {
 }
 
 
-# ---- CloudFront Distribution（オリジン = VPCオリジン経由の internal ALB）----
+# ---- CloudFront Distribution（オリジン = VPCオリジン経由の internal ALB）---- / CloudFront distribution with an internal ALB through a VPC origin
 resource "aws_cloudfront_distribution" "cdn" {
   enabled = true
   comment = "Gradio/FastAPI via internal ALB behind CloudFront VPC Origin"
@@ -61,14 +61,14 @@ resource "aws_cloudfront_distribution" "cdn" {
     origin_id   = "alb-${aws_lb.alb.name}"
     domain_name = aws_lb.alb.dns_name
 
-    # custom_origin_config の代わりに VPCオリジン設定を紐付け
+    # custom_origin_config の代わりに VPCオリジン設定を紐付け / Attach VPC origin settings instead of custom_origin_config
     vpc_origin_config {
-      # aws_cloudfront_vpc_origin の ID を指定
+      # aws_cloudfront_vpc_origin の ID を指定 / Set the ID of aws_cloudfront_vpc_origin
       vpc_origin_id = aws_cloudfront_vpc_origin.alb.id
     }
   }
 
-  # --- UI/動的：キャッシュ無効 + ALBクッキーをフォワード ---
+  # --- UI/動的：キャッシュ無効 + ALBクッキーをフォワード --- / UI and dynamic content: disable caching and forward the ALB cookie
   default_cache_behavior {
     target_origin_id       = "alb-${aws_lb.alb.name}"
     viewer_protocol_policy = "redirect-to-https"
@@ -82,7 +82,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     origin_request_policy_id = aws_cloudfront_origin_request_policy.alb_sticky_cookies.id
   }
 
-  # --- 静的配信（例: /assets/*）：キャッシュ有効、クッキー不要 ---
+  # --- 静的配信（例: /assets/*）：キャッシュ有効、クッキー不要 --- / Static delivery, for example /assets/*: enable caching and do not use cookies
   ordered_cache_behavior {
     path_pattern           = "/assets/*"
     target_origin_id       = "alb-${aws_lb.alb.name}"

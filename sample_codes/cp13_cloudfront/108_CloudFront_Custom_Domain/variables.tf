@@ -17,7 +17,7 @@ variable "availability_zones" {
 }
 
 variable "enable_ipv6" {
-  description = "IPv6を有効にするか（dualstack時にtrue）"
+  description = "IPv6を有効にするか（dualstack時にtrue） / Whether to enable IPv6. Set true for dualstack."
   type        = bool
   default     = true
 }
@@ -28,12 +28,12 @@ variable "hosted_zone_name" {
 }
 
 variable "viewer_domain_name" {
-  description = "CloudFront で配信する独自ドメイン (e.g. app.example.com)"
+  description = "CloudFront で配信する独自ドメイン (e.g. app.example.com) / Custom domain served by CloudFront, for example app.example.com"
   type        = string
 }
 
 variable "origin_subdomain" {
-  description = "ALB 用のオリジン FQDN のサブドメイン (e.g. origin)"
+  description = "ALB 用のオリジン FQDN のサブドメイン (e.g. origin) / Subdomain for the ALB origin FQDN, for example origin."
   type        = string
   default     = "origin"
 }
