@@ -17,13 +17,13 @@ variable "availability_zones" {
 }
 
 variable "enable_ipv6" {
-  description = "IPv6を有効にするか（dualstack時にtrue）"
+  description = "IPv6を有効にするか（dualstack時にtrue） / Whether to enable IPv6. Set true for dualstack."
   type        = bool
   default     = true
 }
 
 variable "asg_target_mem_percent" {
   type        = number
-  description = "Auto Scaling のターゲットトラッキングで狙うメモリ使用率（％）。ASG 内インスタンスの平均 mem_used_percent を目標値に維持します。"
+  description = "Auto Scaling のターゲットトラッキングで狙うメモリ使用率（％）。ASG 内インスタンスの平均 mem_used_percent を目標値に維持します。 / Target memory usage for Auto Scaling target tracking. Keeps the average mem_used_percent of ASG instances near the target."
   default     = 50
 }

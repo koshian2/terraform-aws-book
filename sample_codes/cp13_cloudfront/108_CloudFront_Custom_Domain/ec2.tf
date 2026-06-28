@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -14,7 +14,7 @@ resource "aws_iam_role" "ssm_role" {
   }
 }
 
-# EC2 ロールに S3 読み取り権限を付与
+# EC2 ロールに S3 読み取り権限を付与 / Give S3 read permissions to the EC2 role
 resource "aws_iam_role_policy_attachment" "ssm_core" {
   role       = aws_iam_role.ssm_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
@@ -46,7 +46,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用セキュリティグループ（全Egress許可）----
+# ---- EC2用セキュリティグループ（全Egress許可）---- / Security group for EC2. Allow all egress.
 resource "aws_security_group" "web_instance" {
   name                   = "${var.vpc_name}-ec2-web-sg"
   description            = "No inbound; allow all egress for SSM over NAT"
@@ -76,7 +76,7 @@ data "aws_ssm_parameter" "ubuntu_2404_default_x86_64" {
   name = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id"
 }
 
-# ---- 起動テンプレート ----
+# ---- 起動テンプレート ---- / Launch template
 data "aws_region" "current" {}
 
 resource "aws_launch_template" "web" {
@@ -109,14 +109,14 @@ resource "aws_launch_template" "web" {
   update_default_version = true
 }
 
-# ---- Auto Scaling Group（2台起動 / 配置は private_subnet_ids から）----
+# ---- Auto Scaling Group（2台起動 / 配置は private_subnet_ids から）---- / Auto Scaling Group: start two instances and place them from private_subnet_ids
 resource "aws_autoscaling_group" "web" {
   name                      = "${var.vpc_name}-asg-web"
   max_size                  = 2
   min_size                  = 2
   desired_capacity          = 2
   vpc_zone_identifier       = module.vpc.private_subnet_ids
-  health_check_type         = "ELB" # ← TG/ALBヘルスチェックを使う
+  health_check_type         = "ELB" # ← TG/ALBヘルスチェックを使う / Use target group and ALB health checks
   health_check_grace_period = 300
 
   launch_template {

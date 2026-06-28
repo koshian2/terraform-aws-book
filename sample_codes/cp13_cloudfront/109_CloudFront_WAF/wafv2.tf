@@ -1,5 +1,5 @@
 #---------------------------------------
-# CloudFront 用 WAFv2 Web ACL（Bot 対策メイン）
+# CloudFront 用 WAFv2 Web ACL（Bot 対策メイン） / WAFv2 Web ACL for CloudFront, mainly for bot protection
 #---------------------------------------
 resource "aws_wafv2_web_acl" "cloudfront_waf" {
   provider = aws.us_east_1
@@ -12,7 +12,7 @@ resource "aws_wafv2_web_acl" "cloudfront_waf" {
     allow {}
   }
 
-  # --- ルール定義 ---
+  # --- ルール定義 --- / Rule definitions.
   rule {
     name     = "AWS-AWSManagedRulesBotControlRuleSet"
     priority = 1
@@ -35,7 +35,7 @@ resource "aws_wafv2_web_acl" "cloudfront_waf" {
     }
   }
 
-  # ついでに一般的な悪質リクエストも防ぎたい場合（任意）
+  # ついでに一般的な悪質リクエストも防ぎたい場合（任意） / Optional: also block common malicious requests.
   rule {
     name     = "AWS-AWSManagedRulesCommonRuleSet"
     priority = 2
@@ -49,19 +49,19 @@ resource "aws_wafv2_web_acl" "cloudfront_waf" {
         name        = "AWSManagedRulesCommonRuleSet"
         vendor_name = "AWS"
 
-        # ファイルアップロード時のエラー対策
-        # SizeRestrictions_BODY を Count にしてブロックしない（実質除外）
+        # ファイルアップロード時のエラー対策 / Workaround for file upload errors
+        # SizeRestrictions_BODY を Count にしてブロックしない（実質除外） / Set SizeRestrictions_BODY to Count so it does not block. This effectively excludes it.
         rule_action_override {
           name = "SizeRestrictions_BODY"
           action_to_use {
-            count {} # or allow {} にすると「そのルールがマッチしたら即 allow」
+            count {} # or allow {} にすると「そのルールがマッチしたら即 allow」 / If you use allow {}, the request is allowed immediately when that rule matches.
           }
         }
 
         rule_action_override {
           name = "CrossSiteScripting_BODY"
           action_to_use {
-            count {} # XSS攻撃のリスクはない上で除外する
+            count {} # XSS攻撃のリスクはない上で除外する / Exclude this when there is no XSS attack risk.
           }
         }
       }

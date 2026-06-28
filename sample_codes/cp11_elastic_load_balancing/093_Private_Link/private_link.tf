@@ -1,5 +1,5 @@
-# (1) VPC A: 内部 NLB と Target Group
-# --- NLB用 SG（A VPC 内）
+# (1) VPC A: 内部 NLB と Target Group / Internal NLB and target group.
+# --- NLB用 SG（A VPC 内） / Security group for NLB in VPC A.
 resource "aws_security_group" "a_nlb_sg" {
   name        = "${var.vpc_a_name}-nlb-sg"
   description = "Security group for internal NLB"
@@ -7,7 +7,7 @@ resource "aws_security_group" "a_nlb_sg" {
   tags = { Name = "${var.vpc_a_name}-nlb-sg" }
 }
 
-# 受け口: VPCE→NLBへのTCP/80（基本は広く受け、細かく絞るならVPCE側の送信元で制御）
+# 受け口: VPCE→NLBへのTCP/80（基本は広く受け、細かく絞るならVPCE側の送信元で制御） / Receiver: TCP/80 from VPCE to NLB. It is broad by default; restrict by VPCE source if you need finer control.
 resource "aws_vpc_security_group_ingress_rule" "a_nlb_ingress_80" {
   security_group_id = aws_security_group.a_nlb_sg.id
   ip_protocol       = "tcp"
@@ -17,7 +17,7 @@ resource "aws_vpc_security_group_ingress_rule" "a_nlb_ingress_80" {
   description       = "Allow TCP/80 to NLB (filtered by VPCE SG on the client side)"
 }
 
-# 送信は既定(All egress)でOK
+# 送信は既定(All egress)でOK / The default All egress setting is OK for outbound traffic.
 resource "aws_vpc_security_group_egress_rule" "a_nlb_egress_all" {
   security_group_id = aws_security_group.a_nlb_sg.id
   ip_protocol       = "-1"
@@ -70,18 +70,18 @@ resource "aws_lb_listener" "a_nlb_80" {
   }
 }
 
-# --- A 側 EC2 を TG に登録 ---
+# --- A 側 EC2 を TG に登録 --- / Register the EC2 instance on side A with the target group.
 resource "aws_lb_target_group_attachment" "a_ec2_attach" {
   target_group_arn = aws_lb_target_group.a_tg.arn
   target_id        = aws_instance.ssm["a"].id
   port             = 80
 }
 
-# (2) VPC A: Endpoint Service（PrivateLink サービス側）
+# (2) VPC A: Endpoint Service（PrivateLink サービス側） / Endpoint Service on the PrivateLink service side.
 data "aws_caller_identity" "current" {}
 
 resource "aws_vpc_endpoint_service" "a_service" {
-  acceptance_required = false  # 同アカウント内接続を自動承認
+  acceptance_required = false  # 同アカウント内接続を自動承認 / Automatically approve connections in the same account.
   network_load_balancer_arns = [
     aws_lb.a_nlb.arn
   ]
@@ -91,14 +91,14 @@ resource "aws_vpc_endpoint_service" "a_service" {
   }
 }
 
-# 同一アカウントを許可（同アカウント内の VPC から作る Interface Endpoint を許容）
+# 同一アカウントを許可（同アカウント内の VPC から作る Interface Endpoint を許容） / Allow the same account. This allows Interface Endpoints created from VPCs in the same account.
 resource "aws_vpc_endpoint_service_allowed_principal" "a_service_allow_self" {
   vpc_endpoint_service_id = aws_vpc_endpoint_service.a_service.id
   principal_arn           = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
 }
 
-# (3) VPC B: Interface VPC Endpoint（クライアント側）
-# Endpoint ENI 用 SG（B 内から 80/TCP を許可）
+# (3) VPC B: Interface VPC Endpoint（クライアント側） / Client side.
+# Endpoint ENI 用 SG（B 内から 80/TCP を許可） / Security group for endpoint ENIs. Allow 80/TCP from inside VPC B.
 resource "aws_security_group" "b_vpce_sg" {
   name        = "${var.vpc_b_name}-vpce-sg"
   description = "Interface VPC Endpoint ENI SG"
@@ -108,7 +108,7 @@ resource "aws_security_group" "b_vpce_sg" {
   }
 }
 
-# EC2 BからのSGを参照して許可
+# EC2 BからのSGを参照して許可 / Allow by referencing the security group from EC2 B.
 resource "aws_vpc_security_group_ingress_rule" "b_vpce_ingress_80_from_vpc_b" {
   security_group_id            = aws_security_group.b_vpce_sg.id
   ip_protocol                  = "tcp"
@@ -125,23 +125,23 @@ resource "aws_vpc_security_group_egress_rule" "b_vpce_all_egress" {
   description       = "All egress from Interface Endpoint"
 }
 
-# Interface Endpoint 本体
+# Interface Endpoint 本体 / Interface endpoint resource
 resource "aws_vpc_endpoint" "b_to_a_service" {
   vpc_id              = module.vpc_b.vpc_id
   service_name        = aws_vpc_endpoint_service.a_service.service_name
   vpc_endpoint_type   = "Interface"
   subnet_ids          = module.vpc_b.private_subnet_ids
   security_group_ids  = [aws_security_group.b_vpce_sg.id]
-  private_dns_enabled = false  # 独自 Private DNS 名を使う場合は別途検証・設定が必要
+  private_dns_enabled = false  # 独自 Private DNS 名を使う場合は別途検証・設定が必要 / When using a custom Private DNS name, separate validation and settings are required.
 
   tags = {
     Name = "${var.vpc_b_name}-to-${var.vpc_a_name}-vpce"
   }
 }
 
-# (4) 出力
+# (4) 出力 / Outputs
 output "privatelink" {
-  description = "PrivateLink接続情報: エンドポイントサービス名、VPCエンドポイントID、DNS名など"
+  description = "PrivateLink接続情報: エンドポイントサービス名、VPCエンドポイントID、DNS名など / PrivateLink connection information, such as endpoint service name, VPC endpoint ID, and DNS name."
   value = {
     endpoint_service_name = aws_vpc_endpoint_service.a_service.service_name
     endpoint_id           = aws_vpc_endpoint.b_to_a_service.id

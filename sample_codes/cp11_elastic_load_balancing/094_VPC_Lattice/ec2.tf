@@ -1,4 +1,4 @@
-# ---- 対象VPCのメタ（A/Bの最初のプライベートサブネット）----
+# ---- 対象VPCのメタ（A/Bの最初のプライベートサブネット）---- / Metadata for target VPCs, the first private subnet in A and B
 locals {
   vpcs = {
     a = {
@@ -32,7 +32,7 @@ data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# ---- SSM用 IAMロール/インスタンスプロフィール（A/B）----
+# ---- SSM用 IAMロール/インスタンスプロフィール（A/B）---- / IAM roles and instance profiles for SSM in A and B
 resource "aws_iam_role" "ssm_role" {
   for_each = local.vpcs
   name     = "${each.value.name}-ec2-ssm-role"
@@ -64,7 +64,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用セキュリティグループ（インバウンドはLatticeのデータプレーンから許可、全アウトバウンド許可）（A/B）----
+# ---- EC2用セキュリティグループ（インバウンドはLatticeのデータプレーンから許可、全アウトバウンド許可）（A/B）---- / Security group for EC2. Allow inbound from the Lattice data plane and allow all outbound traffic.
 resource "aws_security_group" "ssm_instance" {
   for_each               = local.vpcs
   name                   = "${each.value.name}-ec2-ssm-sg"
@@ -76,7 +76,7 @@ resource "aws_security_group" "ssm_instance" {
   }
 }
 
-# ---- VPC Lattice のプレフィックスリストを参照 ----
+# ---- VPC Lattice のプレフィックスリストを参照 ---- / Refer to the VPC Lattice prefix list
 data "aws_region" "current" {}
 
 # IPv4
@@ -84,7 +84,7 @@ data "aws_ec2_managed_prefix_list" "lattice_v4" {
   name = "com.amazonaws.${data.aws_region.current.region}.vpc-lattice"
 }
 
-# Ingress : ターゲットEC2の SG（受け口）を「プレフィックスリストからの80/TCP」に
+# Ingress : ターゲットEC2の SG（受け口）を「プレフィックスリストからの80/TCP」に / Ingress : Set the target EC2 security group ingress to 80/TCP from the prefix list
 resource "aws_vpc_security_group_ingress_rule" "http80_from_lattice_v4" {
   for_each          = aws_security_group.ssm_instance
   security_group_id = each.value.id
@@ -111,7 +111,7 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   description       = "All IPv6 egress"
 }
 
-# ---- EC2（A/Bの最初のプライベートサブネット、公開IPなし、SSM接続）----
+# ---- EC2（A/Bの最初のプライベートサブネット、公開IPなし、SSM接続）---- / The first private subnet in A and B, with no public IP and SSM access.
 resource "aws_instance" "ssm" {
   for_each                    = local.vpcs
   ami                         = data.aws_ssm_parameter.al2023_default_x86_64.value

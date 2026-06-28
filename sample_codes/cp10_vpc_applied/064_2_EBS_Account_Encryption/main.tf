@@ -58,17 +58,17 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-# カスタムルートテーブルを作成し、インターネットへのルートを追加
+# カスタムルートテーブルを作成し、インターネットへのルートを追加 / Create a custom route table and add routes to the internet
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
-  # IPv4のデフォルトルート
+  # IPv4のデフォルトルート / IPv4 default route
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  # IPv6のデフォルトルート
+  # IPv6のデフォルトルート / IPv6 default route
   route {
     ipv6_cidr_block = "::/0"
     gateway_id      = aws_internet_gateway.igw.id
@@ -79,13 +79,13 @@ resource "aws_route_table" "public" {
   }
 }
 
-# 作成したルートテーブルをパブリックサブネットに関連付け
+# 作成したルートテーブルをパブリックサブネットに関連付け / Associate the created route table with the public subnet
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
 }
 
-# セキュリティグループ本体
+# セキュリティグループ本体 / Security group resource
 resource "aws_security_group" "ssh_only" {
   name        = "${var.vpc_name}-ssh"
   description = "Allow SSH only from my IP; allow all IPv4 and IPv6 egress"
@@ -95,11 +95,11 @@ resource "aws_security_group" "ssh_only" {
     Name = "${var.vpc_name}-ssh-sg"
   }
 
-  # （任意）削除時にルールを全削除したい場合
+  # （任意）削除時にルールを全削除したい場合 / Optional: delete all rules when the security group is removed
   revoke_rules_on_delete = true
 }
 
-# Ingress: 自分のIPv4からのみSSH(22/tcp)
+# Ingress: 自分のIPv4からのみSSH(22/tcp) / Ingress: allow SSH (22/tcp) only from your IPv4 address
 resource "aws_vpc_security_group_ingress_rule" "ssh_from_my_ipv4" {
   security_group_id = aws_security_group.ssh_only.id
   description       = "SSH from my IPv4"
@@ -109,7 +109,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh_from_my_ipv4" {
   cidr_ipv4         = "${var.my_ip}/32"
 }
 
-# Egress: IPv4 全許可
+# Egress: IPv4 全許可 / Egress: allow all IPv4 traffic
 resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   security_group_id = aws_security_group.ssh_only.id
   description       = "Allow all IPv4 egress"
@@ -117,7 +117,7 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-# Egress: IPv6 全許可
+# Egress: IPv6 全許可 / Egress: allow all IPv6 traffic
 resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   security_group_id = aws_security_group.ssh_only.id
   description       = "Allow all IPv6 egress"
@@ -125,22 +125,22 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   cidr_ipv6         = "::/0"
 }
 
-# 既存のキーペアを取得（存在しないと plan 時にエラー）
+# 既存のキーペアを取得（存在しないと plan 時にエラー） / Get an existing key pair. Plan fails if it does not exist.
 data "aws_key_pair" "this" {
   key_name = "terraform_book_aws"
 }
 
-# AMI を SSM パラメータストアから取得
+# AMI を SSM パラメータストアから取得 / Get the AMI from SSM Parameter Store
 data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# EBSのデフォルト暗号化をON
+# EBSのデフォルト暗号化をON / Turn on default EBS encryption
 resource "aws_ebs_encryption_by_default" "default" {
   enabled = true
 }
 
-# EC2 インスタンス（パブリックサブネットに 1 台）
+# EC2 インスタンス（パブリックサブネットに 1 台） / One EC2 instance in the public subnet
 resource "aws_instance" "public_ec2" {
   ami                    = data.aws_ssm_parameter.al2023_default_x86_64.value
   instance_type          = "t3.micro"
@@ -148,7 +148,7 @@ resource "aws_instance" "public_ec2" {
   vpc_security_group_ids = [aws_security_group.ssh_only.id]
   key_name               = data.aws_key_pair.this.key_name
 
-  # EBSの設定
+  # EBSの設定 / EBS settings
   root_block_device {
     volume_type = "gp3"
     volume_size = 20
@@ -166,7 +166,7 @@ resource "aws_instance" "public_ec2" {
   }
 }
 
-# 便利な出力（任意）
+# 便利な出力（任意） / Useful optional outputs
 output "public_instance_public_dns" {
   value = aws_instance.public_ec2.public_dns
 }

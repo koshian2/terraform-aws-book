@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -27,7 +27,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用SG（インバウンド: 80/TCP は NLB SG からのみ、アウトバウンド: 全許可）----
+# ---- EC2用SG（インバウンド: 80/TCP は NLB SG からのみ、アウトバウンド: 全許可）---- / Security group for EC2. Inbound 80/TCP only from the NLB security group, outbound all allowed.
 resource "aws_security_group" "web_instance" {
   name                   = "${var.vpc_name}-ec2-web-sg"
   description            = "Allow HTTP from NLB; egress all (SSM/NAT)"
@@ -36,7 +36,7 @@ resource "aws_security_group" "web_instance" {
   tags                   = { Name = "${var.vpc_name}-ec2-web-sg" }
 }
 
-# Ingress: NLB の SG からの 80/TCP のみ許可（IPv4/IPv6 共通）
+# Ingress: NLB の SG からの 80/TCP のみ許可（IPv4/IPv6 共通） / Ingress: allow only 80/TCP from the NLB security group for both IPv4 and IPv6
 resource "aws_vpc_security_group_ingress_rule" "web_http_from_nlb" {
   security_group_id            = aws_security_group.web_instance.id
   ip_protocol                  = "tcp"
@@ -46,7 +46,7 @@ resource "aws_vpc_security_group_ingress_rule" "web_http_from_nlb" {
   description                  = "Allow HTTP from NLB security group only"
 }
 
-# egress: 全許可 (IPv4)
+# egress: 全許可 (IPv4) / egress: allow all IPv4 traffic
 resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   security_group_id = aws_security_group.web_instance.id
   ip_protocol       = "-1"
@@ -54,7 +54,7 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   description       = "All IPv4 egress"
 }
 
-# egress: 全許可 (IPv6)
+# egress: 全許可 (IPv6) / egress: allow all IPv6 traffic
 resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   security_group_id = aws_security_group.web_instance.id
   ip_protocol       = "-1"
@@ -67,7 +67,7 @@ data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# ---- EC2（プライベートサブネット。公開IPなし、SSM接続）----
+# ---- EC2（プライベートサブネット。公開IPなし、SSM接続）---- / EC2 in a private subnet, with no public IP and SSM access
 resource "aws_instance" "web" {
   ami                         = data.aws_ssm_parameter.al2023_default_x86_64.value
   instance_type               = "t3.micro"
@@ -86,7 +86,7 @@ resource "aws_instance" "web" {
     dnf -y install nginx
     systemctl enable --now nginx
 
-    # 念のため SSM Agent 有効化（AL2023 は基本インストール済）
+    # 念のため SSM Agent 有効化（AL2023 は基本インストール済） / Enable SSM Agent just in case. It is usually already installed on AL2023.
     systemctl enable --now amazon-ssm-agent
 
     echo "hello from $(hostname -f)" > /usr/share/nginx/html/index.html

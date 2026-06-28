@@ -17,19 +17,19 @@ variable "availability_zones" {
 }
 
 variable "enable_ipv6" {
-  description = "IPv6を有効にするか（dualstack時にtrue）"
+  description = "IPv6を有効にするか（dualstack時にtrue） / Whether to enable IPv6. Set true for dualstack."
   type        = bool
   default     = true
 }
 
 variable "bucket_name_prefix" {
-  description = "S3 バケット名プレフィックス（後ろにランダムサフィックス付与）"
+  description = "S3 バケット名プレフィックス（後ろにランダムサフィックス付与） / S3 bucket name prefix. A random suffix is added."
   type        = string
   default     = "error-page"
 }
 
 variable "site_dir" {
-  description = "静的サイトの元ディレクトリ"
+  description = "静的サイトの元ディレクトリ / Source directory for the static site"
   type        = string
   default     = "../../apps/aws_conference_page"
 }

@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -19,7 +19,7 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# CloudWatch Agent 用の権限を追加
+# CloudWatch Agent 用の権限を追加 / Add permissions for CloudWatch Agent
 resource "aws_iam_role_policy_attachment" "cwagent" {
   role       = aws_iam_role.ssm_role.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
@@ -42,7 +42,7 @@ resource "aws_security_group" "web_instance" {
   tags                   = { Name = "${var.vpc_name}-ec2-web-sg" }
 }
 
-# Ingress: ALB SG → 80/TCP のみ許可（クライアント直アクセスは不可）
+# Ingress: ALB SG → 80/TCP のみ許可（クライアント直アクセスは不可） / Ingress: allow only 80/TCP from the ALB security group. Direct client access is not allowed.
 resource "aws_vpc_security_group_ingress_rule" "web_http_from_alb" {
   security_group_id            = aws_security_group.web_instance.id
   ip_protocol                  = "tcp"
@@ -52,7 +52,7 @@ resource "aws_vpc_security_group_ingress_rule" "web_http_from_alb" {
   description                  = "Allow HTTP from ALB"
 }
 
-# Egress: 全許可 (IPv4)
+# Egress: 全許可 (IPv4) / egress: allow all IPv4 traffic
 resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   security_group_id = aws_security_group.web_instance.id
   ip_protocol       = "-1"
@@ -60,7 +60,7 @@ resource "aws_vpc_security_group_egress_rule" "all_ipv4" {
   description       = "All IPv4 egress (via NAT GW)"
 }
 
-# Egress: 全許可 (IPv6) ※使う場合のみ
+# Egress: 全許可 (IPv6) ※使う場合のみ / egress: allow all IPv6 traffic only when used
 resource "aws_vpc_security_group_egress_rule" "all_ipv6" {
   count             = var.enable_ipv6 ? 1 : 0
   security_group_id = aws_security_group.web_instance.id
@@ -74,7 +74,7 @@ data "aws_ssm_parameter" "ubuntu_2404_default_x86_64" {
   name = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id"
 }
 
-# Cloudwatch Agent対応のユーザーデータに置き換え
+# Cloudwatch Agent対応のユーザーデータに置き換え / Replace with user data that supports CloudWatch Agent
 locals {
   user_data = templatefile(
     "${path.module}/../../apps/flask_load_test/cloudinit_cwagent.yaml.tftpl",
@@ -88,7 +88,7 @@ locals {
   )
 }
 
-# ---- 起動テンプレート ----
+# ---- 起動テンプレート ---- / Launch template
 resource "aws_launch_template" "web" {
   name_prefix   = "${var.vpc_name}-lt-web-"
   image_id      = data.aws_ssm_parameter.ubuntu_2404_default_x86_64.value
@@ -98,14 +98,14 @@ resource "aws_launch_template" "web" {
     name = aws_iam_instance_profile.ssm_profile.name
   }
 
-  # サブネットはASG側で指定するため、ここでは指定しない
+  # サブネットはASG側で指定するため、ここでは指定しない / Do not set subnets here because the ASG sets them
   network_interfaces {
-    # パブリックIPは付与しない（プライベートサブネット運用前提）
+    # パブリックIPは付与しない（プライベートサブネット運用前提） / Do not assign public IPs. This assumes private subnet operation.
     associate_public_ip_address = false
     security_groups             = [aws_security_group.web_instance.id]
   }
 
-  # メトリックへの反映が遅いので詳細モニタリングを有効化
+  # メトリックへの反映が遅いので詳細モニタリングを有効化 / Enable detailed monitoring because metrics can take time to appear
   monitoring {
     enabled = true
   }
@@ -114,7 +114,7 @@ resource "aws_launch_template" "web" {
     http_tokens = "required"
   }
 
-  # user_data は base64 エンコード文字列
+  # user_data は base64 エンコード文字列 / user_data is a Base64-encoded string
   user_data = base64encode(local.user_data)
 
   tag_specifications {
@@ -124,11 +124,11 @@ resource "aws_launch_template" "web" {
     }
   }
 
-  # 後続で $Latest を参照するので明示更新不要でもOK
+  # 後続で $Latest を参照するので明示更新不要でもOK / Later resources refer to $Latest, so explicit updates are not required
   update_default_version = true
 }
 
-# ---- Auto Scaling Group（TGに直接ぶら下げる）----
+# ---- Auto Scaling Group（TGに直接ぶら下げる）---- / Auto Scaling Group attached directly to the target group
 resource "aws_autoscaling_group" "web" {
   name                = "${var.vpc_name}-asg-web"
   max_size            = 5
@@ -139,10 +139,10 @@ resource "aws_autoscaling_group" "web" {
   health_check_type         = "ELB"
   health_check_grace_period = 300
 
-  # StepScaling のウォームアップは cooldown ではなく ASG 側で
+  # StepScaling のウォームアップは cooldown ではなく ASG 側で / For Step Scaling, set warmup on the ASG side instead of cooldown
   default_instance_warmup = 90
 
-  # ここで TG に関連付け
+  # ここで TG に関連付け / Associate with the target group here
   target_group_arns = [aws_lb_target_group.web.arn]
 
   launch_template {
@@ -150,7 +150,7 @@ resource "aws_autoscaling_group" "web" {
     version = "$Latest"
   }
 
-  # （任意）ASGメトリクス可視化を有効化
+  # （任意）ASGメトリクス可視化を有効化 / Optional: enable ASG metrics for visibility
   metrics_granularity = "1Minute"
   enabled_metrics = [
     "GroupDesiredCapacity",
@@ -186,16 +186,16 @@ resource "aws_autoscaling_policy" "web_scale_out_steps" {
   adjustment_type         = "ChangeInCapacity"
   metric_aggregation_type = "Average"
 
-  # threshold(=0.7) をどれだけ超えたかで増分を変える
+  # threshold(=0.7) をどれだけ超えたかで増分を変える / Change the increment based on how far the value exceeds threshold (= 0.7).
   step_adjustment {
-    # 0.7〜1.2 相当 (超過量 0.0〜0.5) は +1
+    # 0.7〜1.2 相当 (超過量 0.0〜0.5) は +1 / Add 1 when the value is about 0.7 to 1.2, with excess of 0.0 to 0.5.
     metric_interval_lower_bound = 0
     metric_interval_upper_bound = 0.5
     scaling_adjustment          = 1
   }
 
   step_adjustment {
-    # 1.2 以上 (超過量 0.5 以上) は +2
+    # 1.2 以上 (超過量 0.5 以上) は +2 / Add 2 when the value is 1.2 or higher, with excess of 0.5 or more.
     metric_interval_lower_bound = 0.5
     scaling_adjustment          = 2
   }
@@ -209,7 +209,7 @@ resource "aws_autoscaling_policy" "web_scale_in_steps" {
   adjustment_type         = "ChangeInCapacity"
   metric_aggregation_type = "Average"
 
-  # しきい値以下は常に -1
+  # しきい値以下は常に -1 / Always use -1 below the threshold
   step_adjustment {
     metric_interval_upper_bound = 0
     scaling_adjustment          = -1
@@ -217,7 +217,7 @@ resource "aws_autoscaling_policy" "web_scale_in_steps" {
 }
 
 # =========================================
-# CloudWatch Alarms (metric_query 構文)
+# CloudWatch Alarms (metric_query 構文) / CloudWatch alarms using metric_query syntax.
 # =========================================
 
 # --- Scale OUT: e1 >= 0.7 ---
@@ -226,7 +226,7 @@ resource "aws_cloudwatch_metric_alarm" "web_scale_out_alarm" {
   alarm_description   = "Composite (CPU/100 + MEM/100) >= 0.7"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   threshold           = 0.7
-  # 1分間満たしたらスケールアウト
+  # 1分間満たしたらスケールアウト / Scale out when the condition is met for 1 minute.
   evaluation_periods  = 1
   datapoints_to_alarm = 1
   treat_missing_data  = "notBreaching"
@@ -239,7 +239,7 @@ resource "aws_cloudwatch_metric_alarm" "web_scale_out_alarm" {
     return_data = true
   }
 
-  # CPU (ASG平均)
+  # CPU (ASG平均) / CPU average for the ASG.
   metric_query {
     id = "m_cpu"
     metric {
@@ -248,13 +248,13 @@ resource "aws_cloudwatch_metric_alarm" "web_scale_out_alarm" {
       period      = 60
       stat        = "Average"
       dimensions = {
-        # ASG 配下インスタンスの CPU を ASG 次元で集計
+        # ASG 配下インスタンスの CPU を ASG 次元で集計 / Aggregate CPU for instances under the ASG by the ASG dimension.
         AutoScalingGroupName = aws_autoscaling_group.web.name
       }
     }
   }
 
-  # MEM (ASG平均) - CWAgent 側で AutoScalingGroupName を append 済み前提
+  # MEM (ASG平均) - CWAgent 側で AutoScalingGroupName を append 済み前提 / Memory average for the ASG. Assumes CWAgent appends AutoScalingGroupName.
   metric_query {
     id = "m_mem"
     metric {
@@ -277,7 +277,7 @@ resource "aws_cloudwatch_metric_alarm" "web_scale_in_alarm" {
   alarm_description   = "Composite (CPU/100 + MEM/100) <= 0.5"
   comparison_operator = "LessThanOrEqualToThreshold"
   threshold           = 0.5
-  # 1 分×5 点連続で OK 条件を満たしたらスケールイン
+  # 1 分×5 点連続で OK 条件を満たしたらスケールイン / Scale in after five consecutive 1-minute datapoints meet the OK condition.
   evaluation_periods  = 5
   datapoints_to_alarm = 5
   treat_missing_data  = "notBreaching"

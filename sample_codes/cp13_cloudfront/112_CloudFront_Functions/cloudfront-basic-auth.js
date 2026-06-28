@@ -1,6 +1,6 @@
 import cf from 'cloudfront';
 
-// 関連付け済みの KeyValueStore を取得
+// 関連付け済みの KeyValueStore を取得 / Get the associated KeyValueStore
 const kvsHandle = cf.kvs();
 
 async function handler(event) {
@@ -11,22 +11,22 @@ async function handler(event) {
 
   let expected = null;
   try {
-    // Terraform 側で登録した key = "basic_auth_header"
+    // Terraform 側で登録した key = "basic_auth_header" / key = basic_auth_header registered by Terraform
     // value = "Basic <base64(username:password)>"
     expected = await kvsHandle.get("basic_auth_header", { format: "string" });
   } catch (err) {
-    // KVS 取得に失敗したらログだけ出して認証エラー扱い
+    // KVS 取得に失敗したらログだけ出して認証エラー扱い / If KVS lookup fails, log it and treat it as an auth error
     console.log("kvs get failed: " + err);
   }
 
-  // 認証 OK: Authorization をオリジンに渡さないよう削除してそのまま進める
+  // 認証 OK: Authorization をオリジンに渡さないよう削除してそのまま進める / Auth OK: remove Authorization so it is not sent to the origin, then continue
   if (expected && authHeader === expected) {
     delete headers.authorization;
     request.headers = headers;
     return request;
   }
 
-  // 認証 NG: 401 を返す
+  // 認証 NG: 401 を返す / Auth NG: return 401
   return {
     statusCode: 401,
     statusDescription: "Unauthorized",

@@ -1,15 +1,15 @@
-# --- Route 53 レコード ---
-# Route 53（既存のパブリックホストゾーンを参照）
+# --- Route 53 レコード --- / Route 53 records
+# Route 53（既存のパブリックホストゾーンを参照） / Route 53 using an existing public hosted zone
 data "aws_route53_zone" "public" {
   name         = var.public_zone_name
   private_zone = false
 }
 
-# --- ACM 証明書（パブリックホストゾーン経由のDNS 検証）---
-# --- intra + wildcard を1枚で発行 ---
+# --- ACM 証明書（パブリックホストゾーン経由のDNS 検証）--- / DNS validation through a public hosted zone.
+# --- intra + wildcard を1枚で発行 --- / Issue one certificate for intra and wildcard names.
 resource "aws_acm_certificate" "this" {
-  domain_name               = var.private_zone_name          # 例: intra.example.com
-  subject_alternative_names = ["*.${var.private_zone_name}"] # 例: *.intra.example.com
+  domain_name               = var.private_zone_name          # 例: intra.example.com / example: intra.example.com
+  subject_alternative_names = ["*.${var.private_zone_name}"] # 例: *.intra.example.com / example: *.intra.example.com
   validation_method         = "DNS"
 
   lifecycle {
@@ -17,7 +17,7 @@ resource "aws_acm_certificate" "this" {
   }
 }
 
-# 検証 CNAME は Public Hosted Zone に作成
+# 検証 CNAME は Public Hosted Zone に作成 / Create the validation CNAME in the public hosted zone.
 resource "aws_route53_record" "acm_validation" {
   for_each = {
     for dvo in aws_acm_certificate.this.domain_validation_options :
@@ -41,7 +41,7 @@ resource "aws_acm_certificate_validation" "this" {
   validation_record_fqdns = [for r in aws_route53_record.acm_validation : r.fqdn]
 }
 
-# --- プライベートホストゾーン（各VPCに配置）---
+# --- プライベートホストゾーン（各VPCに配置）--- / Private hosted zone placed in each VPC.
 resource "aws_route53_zone" "private" {
   name = var.private_zone_name
   vpc {
@@ -53,14 +53,14 @@ resource "aws_route53_zone" "private" {
 
 data "aws_region" "current" {}
 
-# VPN VPC からも解決できるよう関連付け
+# VPN VPC からも解決できるよう関連付け / Associate it so the VPN VPC can also resolve names.
 resource "aws_route53_zone_association" "private_vpn" {
   zone_id    = aws_route53_zone.private.zone_id
   vpc_id     = module.vpc_vpn.vpc_id
-  vpc_region = data.aws_region.current.region # リージョン指定が重要
+  vpc_region = data.aws_region.current.region # リージョン指定が重要 / Specifying the Region is important.
 }
 
-# ワイルドカードのA/AAAA DNSレコードを追加 (*.intra.example.com)
+# ワイルドカードのA/AAAA DNSレコードを追加 (*.intra.example.com) / Add wildcard A/AAAA DNS records for *.intra.example.com.
 resource "aws_route53_record" "wild_a" {
   zone_id = aws_route53_zone.private.zone_id
   name    = "*.${var.private_zone_name}"

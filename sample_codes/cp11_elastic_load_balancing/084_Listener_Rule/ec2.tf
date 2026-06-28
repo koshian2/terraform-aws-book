@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -27,7 +27,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用セキュリティグループ（ALBからのHTTP許可、全Egress許可）----
+# ---- EC2用セキュリティグループ（ALBからのHTTP許可、全Egress許可）---- / Security group for EC2. Allow HTTP from ALB and allow all egress.
 resource "aws_security_group" "web_instance" {
   name                   = "${var.vpc_name}-ec2-web-sg"
   description            = "No inbound; allow all egress for SSM over NAT"
@@ -65,7 +65,7 @@ data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# ---- EC2（プライベートサブネット。公開IPなし、SSM接続）----
+# ---- EC2（プライベートサブネット。公開IPなし、SSM接続）---- / EC2 in a private subnet, with no public IP and SSM access
 resource "aws_instance" "web" {
   ami                         = data.aws_ssm_parameter.al2023_default_x86_64.value
   instance_type               = "t3.micro"
@@ -84,7 +84,7 @@ resource "aws_instance" "web" {
     dnf -y install nginx
     systemctl enable --now nginx
 
-    # 念のため SSM Agent 有効化（AL2023 は基本インストール済）
+    # 念のため SSM Agent 有効化（AL2023 は基本インストール済） / Enable SSM Agent just in case. It is usually already installed on AL2023.
     systemctl enable --now amazon-ssm-agent
 
     echo "hello from $(hostname -f)" > /usr/share/nginx/html/index.html

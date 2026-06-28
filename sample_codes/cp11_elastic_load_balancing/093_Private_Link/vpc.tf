@@ -1,5 +1,5 @@
-# ---- VPCの定義 ----
-# VPC Aの定義
+# ---- VPCの定義 ---- / VPC definitions
+# VPC Aの定義 / Definition of VPC A
 module "vpc_a" {
   source = "../../../modules/vpc"
 
@@ -8,7 +8,7 @@ module "vpc_a" {
   availability_zones = var.availability_zones
 }
 
-# VPC Bの定義
+# VPC Bの定義 / Definition of VPC B
 module "vpc_b" {
   source = "../../../modules/vpc"
 

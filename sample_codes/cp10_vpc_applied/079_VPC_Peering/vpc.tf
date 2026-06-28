@@ -1,5 +1,5 @@
-# ---- VPCの定義 ----
-# VPC Aの定義
+# ---- VPCの定義 ---- / VPC definitions
+# VPC Aの定義 / Definition of VPC A
 module "vpc_a" {
   source = "../../../modules/vpc"
 
@@ -8,7 +8,7 @@ module "vpc_a" {
   availability_zones = var.availability_zones
 }
 
-# VPC Bの定義
+# VPC Bの定義 / Definition of VPC B
 module "vpc_b" {
   source = "../../../modules/vpc"
 
@@ -21,15 +21,15 @@ module "vpc_b" {
 resource "aws_vpc_peering_connection" "a_to_b" {
   vpc_id      = module.vpc_a.vpc_id
   peer_vpc_id = module.vpc_b.vpc_id
-  auto_accept = true # 同一アカウント/リージョンなら自動承諾
+  auto_accept = true # 同一アカウント/リージョンなら自動承諾 / Automatically accept when it is the same account and Region.
 
   tags = {
     Name = "${var.vpc_a_name}<->${var.vpc_b_name}"
   }
 }
 
-# オプション：DNS 解決を相互許可（Route 53 Private Hosted Zone 越しの名前解決などで有用）
-# この例でも、相手方のVPCにあるEC2のプライベートリソースDNSの名前解決が可能になる
+# オプション：DNS 解決を相互許可（Route 53 Private Hosted Zone 越しの名前解決などで有用） / Optional: allow DNS resolution both ways. Useful for name resolution through Route 53 private hosted zones.
+# この例でも、相手方のVPCにあるEC2のプライベートリソースDNSの名前解決が可能になる / In this example, private resource DNS names for EC2 in the peer VPC can also be resolved
 resource "aws_vpc_peering_connection_options" "a_to_b" {
   vpc_peering_connection_id = aws_vpc_peering_connection.a_to_b.id
 
@@ -41,7 +41,7 @@ resource "aws_vpc_peering_connection_options" "a_to_b" {
   }
 }
 
-# ---- ルートテーブルの更新 ----
+# ---- ルートテーブルの更新 ---- / Update route tables.
 locals {
   a_route_tables = {
     public  = module.vpc_a.public_route_table_id
@@ -53,7 +53,7 @@ locals {
   }
 }
 
-# A -> B (両方の RT に同じ宛先ルートを作成)
+# A -> B (両方の RT に同じ宛先ルートを作成) / Create the same destination route in both route tables.
 resource "aws_route" "a_to_b" {
   for_each                  = local.a_route_tables
   route_table_id            = each.value

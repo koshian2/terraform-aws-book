@@ -1,4 +1,4 @@
-# ---- VPCの定義 ----
+# ---- VPCの定義 ---- / VPC definitions
 module "vpc" {
   source = "../../../modules/vpc"
 

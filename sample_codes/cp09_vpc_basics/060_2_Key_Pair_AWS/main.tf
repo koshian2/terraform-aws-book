@@ -22,12 +22,12 @@ provider "aws" {
   profile = var.aws_profile_name
 }
 
-# 既存のキーペアを取得（存在しないと plan 時にエラーになります）
+# 既存のキーペアを取得（存在しないと plan 時にエラーになります） / Get an existing key pair. Plan fails if it does not exist.
 data "aws_key_pair" "this" {
   key_name = "terraform_book_aws"
 }
 
-# 確認用の出力（任意）
+# 確認用の出力（任意） / Optional output for checking
 output "key_name_in_use" {
   value = data.aws_key_pair.this.key_name
 }

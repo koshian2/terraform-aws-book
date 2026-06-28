@@ -27,7 +27,7 @@ resource "aws_subnet" "public" {
   }
 }
 
-# インターネットゲートウェイ
+# インターネットゲートウェイ / Internet gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
@@ -40,13 +40,13 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
-  # IPv4のデフォルトルート
+  # IPv4のデフォルトルート / IPv4 default route
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  # IPv6のデフォルトルート
+  # IPv6のデフォルトルート / IPv6 default route
   route {
     ipv6_cidr_block = "::/0"
     gateway_id      = aws_internet_gateway.igw.id
@@ -57,7 +57,7 @@ resource "aws_route_table" "public" {
   }
 }
 
-# パブリック各サブネットに関連付け
+# パブリック各サブネットに関連付け / Associate with each public subnet
 resource "aws_route_table_association" "public_assoc" {
   count          = length(aws_subnet.public)
   subnet_id      = aws_subnet.public[count.index].id
@@ -72,7 +72,7 @@ resource "aws_subnet" "private" {
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.main.ipv6_cidr_block, 8, length(var.availability_zones) + count.index)
   availability_zone               = element(var.availability_zones, count.index)
   map_public_ip_on_launch         = false
-  assign_ipv6_address_on_creation = true # Egress Only IGWに流しコストを節約する際に有効
+  assign_ipv6_address_on_creation = true # Egress Only IGWに流しコストを節約する際に有効 / Enable this when sending IPv6 traffic through the egress-only internet gateway to save cost.
 
   enable_dns64                                   = false
   enable_resource_name_dns_a_record_on_launch    = true
@@ -83,7 +83,7 @@ resource "aws_subnet" "private" {
   }
 }
 
-# Egress-Only インターネットゲートウェイ
+# Egress-Only インターネットゲートウェイ / Egress-only internet gateway
 resource "aws_egress_only_internet_gateway" "eigw" {
   vpc_id = aws_vpc.main.id
   tags = {
@@ -91,11 +91,11 @@ resource "aws_egress_only_internet_gateway" "eigw" {
   }
 }
 
-# プライベートルートテーブル
+# プライベートルートテーブル / Private route table
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
-  # IPv6 デフォルトは EIGW（外向きのみ）
+  # IPv6 デフォルトは EIGW（外向きのみ） / The IPv6 default route uses the egress-only internet gateway for outbound traffic only
   route {
     ipv6_cidr_block        = "::/0"
     egress_only_gateway_id = aws_egress_only_internet_gateway.eigw.id
@@ -106,14 +106,14 @@ resource "aws_route_table" "private" {
   }
 }
 
-# プライベート各サブネットに関連付け
+# プライベート各サブネットに関連付け / Associate with each private subnet
 resource "aws_route_table_association" "private_assoc" {
   count          = length(aws_subnet.private)
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
 }
 
-# VPCエンドポイント用セキュリティグループ（VPC内→443のみ）
+# VPCエンドポイント用セキュリティグループ（VPC内→443のみ） / Security group for VPC endpoints. Allow only 443 from inside the VPC.
 resource "aws_security_group" "vpce" {
   name                   = "${var.vpc_name}-vpce-sg"
   description            = "Allow HTTPS from VPC to Interface Endpoints"
@@ -156,7 +156,7 @@ resource "aws_vpc_security_group_egress_rule" "vpce_all_v6" {
 }
 
 locals {
-  # 作成するエンドポイントのサービス名をリスト化
+  # 作成するエンドポイントのサービス名をリスト化 / List the service names for endpoints to create
   session_manager_services = toset([
     "ssm",
     "ssmmessages",
@@ -164,21 +164,21 @@ locals {
   ])
 }
 
-# データソースでサービス名を取得
+# データソースでサービス名を取得 / Get service names with data sources
 data "aws_vpc_endpoint_service" "session_manager" {
   for_each = local.session_manager_services
   service  = each.key
 }
 
-# Interface VPC Endpoints（Private DNS 有効）
+# Interface VPC Endpoints（Private DNS 有効） / Interface VPC endpoints with Private DNS enabled
 resource "aws_vpc_endpoint" "session_manager" {
   for_each = local.session_manager_services
 
   vpc_id            = aws_vpc.main.id
   service_name      = data.aws_vpc_endpoint_service.session_manager[each.key].service_name
   vpc_endpoint_type = "Interface"
-  # 可用性を考慮する場合は aws_subnet.private[*].id とする
-  # ただし、エンドポイントが配置される「サブネットの数×3（この例では9）」時間料金が発生するためコストに注意
+  # 可用性を考慮する場合は aws_subnet.private[*].id とする / Use aws_subnet.private[*].id when you want higher availability
+  # ただし、エンドポイントが配置される「サブネットの数×3（この例では9）」時間料金が発生するためコストに注意 / Be careful about cost because hourly charges apply for the number of endpoint subnets times three, nine in this example.
   subnet_ids          = [aws_subnet.private[0].id]
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpce.id]

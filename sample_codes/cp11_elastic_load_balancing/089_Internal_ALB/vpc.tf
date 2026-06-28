@@ -15,7 +15,7 @@ module "vpc_vpn" {
   assign_ipv6        = var.enable_ipv6
 }
 
-# --- VPC Peering (web <-> vpn) + DNS解決許可 ---
+# --- VPC Peering (web <-> vpn) + DNS解決許可 --- / VPC peering between web and vpn, with DNS resolution allowed
 resource "aws_vpc_peering_connection" "web_to_vpn" {
   vpc_id      = module.vpc_web.vpc_id
   peer_vpc_id = module.vpc_vpn.vpc_id
@@ -34,7 +34,7 @@ resource "aws_vpc_peering_connection_options" "opts" {
   }
 }
 
-# 双方のプライベートRTに相互ルートを追加
+# 双方のプライベートRTに相互ルートを追加 / Add routes to each other in both private route tables
 resource "aws_route" "web_to_vpn_v4" {
   route_table_id            = module.vpc_web.private_route_table_id
   destination_cidr_block    = module.vpc_vpn.vpc_ipv4_cidr

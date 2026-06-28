@@ -1,16 +1,16 @@
 locals {
-  # "Basic <base64(username:password)>" を作る
+  # "Basic <base64(username:password)>" を作る / Create Basic <base64(username:password)>
   basic_auth_header_value = "Basic ${base64encode("${var.basic_auth_username}:${var.basic_auth_password}")}"
 }
 
 #####################################
-# CloudFront KeyValueStore（Basic Auth 用）
+# CloudFront KeyValueStore（Basic Auth 用） / CloudFront KeyValueStore for Basic Auth
 #####################################
 resource "aws_cloudfront_key_value_store" "basic_auth" {
   name = "${local.bucket_name}-basic-auth-kvs"
 }
 
-# 上の KeyValueStore に Basic 認証用のヘッダー値を登録
+# 上の KeyValueStore に Basic 認証用のヘッダー値を登録 / Register the Basic Auth header value in the KeyValueStore above
 resource "aws_cloudfrontkeyvaluestore_key" "basic_auth_header" {
   key_value_store_arn = aws_cloudfront_key_value_store.basic_auth.arn
 
@@ -29,7 +29,7 @@ resource "aws_cloudfront_function" "basic_auth" {
 
   code = file("${path.module}/cloudfront-basic-auth.js")
 
-  # KeyValueStore を関連付け
+  # KeyValueStore を関連付け / Attach the KeyValueStore
   key_value_store_associations = [
     aws_cloudfront_key_value_store.basic_auth.arn
   ]
@@ -47,10 +47,10 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 }
 
 #---------------------------------------
-# データソース: マネージドキャッシュポリシーのIDを取得
+# データソース: マネージドキャッシュポリシーのIDを取得 / Data source: get the managed cache policy ID
 #---------------------------------------
 data "aws_cloudfront_cache_policy" "caching_optimized" {
-  name = "Managed-CachingOptimized" # "CachingOptimized" という名前のマネージドポリシー
+  name = "Managed-CachingOptimized" # "CachingOptimized" という名前のマネージドポリシー / Managed policy named CachingOptimized
 }
 
 #---------------------------------------
@@ -76,10 +76,10 @@ resource "aws_cloudfront_distribution" "cdn" {
 
     compress = true
 
-    # CachingOptimizedマネージドポリシー
+    # CachingOptimizedマネージドポリシー / CachingOptimized managed policy
     cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id
 
-    # ==== ここで CloudFront Function を紐付ける ====
+    # ==== ここで CloudFront Function を紐付ける ==== / Attach the CloudFront Function here
     function_association {
       event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.basic_auth.arn

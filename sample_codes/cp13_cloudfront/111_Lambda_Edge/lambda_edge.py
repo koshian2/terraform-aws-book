@@ -14,13 +14,13 @@ def lambda_handler(event, context):
     if status in target_status_codes:
         uri = request.get('uri', '')
 
-        # 無限ループ防止：すでに /error.html にいる場合は何もしない
+        # 無限ループ防止：すでに /error.html にいる場合は何もしない / Prevent an infinite loop: do nothing if the request is already for /error.html.
         if uri.startswith('/error.html'):
             return response
 
         error_type = str(status)
 
-        # シンプルに type だけ付ける
+        # シンプルに type だけ付ける / Simply add only the type value.
         location = f"/error.html?type={error_type}"
 
         new_response = {

@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "this" {
   }
 }
 
-# バケット名を出力
+# バケット名を出力 / Output the bucket name.
 output "s3_bucket_name" {
   value = aws_s3_bucket.this.id
 }

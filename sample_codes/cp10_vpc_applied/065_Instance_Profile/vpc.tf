@@ -34,17 +34,17 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-# カスタムルートテーブルを作成し、インターネットへのルートを追加
+# カスタムルートテーブルを作成し、インターネットへのルートを追加 / Create a custom route table and add routes to the internet
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
-  # IPv4のデフォルトルート
+  # IPv4のデフォルトルート / IPv4 default route
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  # IPv6のデフォルトルート
+  # IPv6のデフォルトルート / IPv6 default route
   route {
     ipv6_cidr_block = "::/0"
     gateway_id      = aws_internet_gateway.igw.id
@@ -55,7 +55,7 @@ resource "aws_route_table" "public" {
   }
 }
 
-# 作成したルートテーブルをパブリックサブネットに関連付け
+# 作成したルートテーブルをパブリックサブネットに関連付け / Associate the created route table with the public subnet
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id

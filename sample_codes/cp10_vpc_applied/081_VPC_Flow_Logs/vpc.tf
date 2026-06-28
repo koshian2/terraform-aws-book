@@ -6,7 +6,7 @@ module "vpc" {
   availability_zones = var.availability_zones
 }
 
-#  VPC フローログの有効化
+#  VPC フローログの有効化 / Enable VPC Flow Logs
 resource "aws_flow_log" "vpc" {
   vpc_id               = module.vpc.vpc_id
   log_destination_type = "s3"

@@ -1,4 +1,4 @@
-# ---- SSM用 IAMロール & インスタンスプロフィール ----
+# ---- SSM用 IAMロール & インスタンスプロフィール ---- / IAM role and instance profile for SSM
 resource "aws_iam_role" "ssm_role" {
   name = "${var.vpc_name}-ec2-ssm-role"
   assume_role_policy = jsonencode({
@@ -27,7 +27,7 @@ resource "aws_iam_instance_profile" "ssm_profile" {
   }
 }
 
-# ---- EC2用セキュリティグループ（インバウンド0、全Egress許可）----
+# ---- EC2用セキュリティグループ（インバウンド0、全Egress許可）---- / Security group for EC2. No inbound rules and all egress allowed.
 resource "aws_security_group" "ssm_instance" {
   name                   = "${var.vpc_name}-ec2-ssm-sg"
   description            = "No inbound; allow all egress for SSM over NAT"
@@ -57,7 +57,7 @@ data "aws_ssm_parameter" "al2023_default_x86_64" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-# ---- EC2（各プライベートサブネットに1台ずつ）----
+# ---- EC2（各プライベートサブネットに1台ずつ）---- / One EC2 instance in each private subnet
 resource "aws_instance" "ssm" {
   count                       = length(aws_subnet.private)
   ami                         = data.aws_ssm_parameter.al2023_default_x86_64.value
@@ -76,7 +76,7 @@ resource "aws_instance" "ssm" {
   }
 }
 
-# 複数台のIDを出力
+# 複数台のIDを出力 / Output IDs for multiple instances.
 output "ssm_instance_ids" {
   description = "SSM-connected EC2 instance IDs (one per private subnet)"
   value       = aws_instance.ssm[*].id

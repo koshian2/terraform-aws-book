@@ -1,4 +1,4 @@
-# ---- ALBログ出力用 S3 バケット ----
+# ---- ALBログ出力用 S3 バケット ---- / S3 bucket for ALB log output.
 resource "random_string" "suffix" {
   length  = 6
   lower   = true
@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "alb_logs" {
   }
 }
 
-# 所有権コントロール（ログ配信のACLを受け入れるため）
+# 所有権コントロール（ログ配信のACLを受け入れるため） / Ownership controls to accept ACLs for log delivery.
 resource "aws_s3_bucket_ownership_controls" "alb_logs" {
   bucket = aws_s3_bucket.alb_logs.id
   rule {
@@ -25,7 +25,7 @@ resource "aws_s3_bucket_ownership_controls" "alb_logs" {
   }
 }
 
-# バケットポリシー: ALBログ配信サービスに PutObject を許可
+# バケットポリシー: ALBログ配信サービスに PutObject を許可 / Bucket policy: allow PutObject from the ALB log delivery service.
 data "aws_iam_policy_document" "alb_logs" {
   statement {
     sid    = "AllowELBLogDelivery"
@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "alb_logs" {
       "arn:aws:s3:::${aws_s3_bucket.alb_logs.id}/alb/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
     ]
 
-    # バケット所有者が確実に所有できるよう ACL ヘッダを要求
+    # バケット所有者が確実に所有できるよう ACL ヘッダを要求 / Require the ACL header so the bucket owner can surely own the object.
     condition {
       test     = "StringEquals"
       variable = "s3:x-amz-acl"
@@ -56,7 +56,7 @@ resource "aws_s3_bucket_policy" "alb_logs" {
   depends_on = [aws_s3_bucket_ownership_controls.alb_logs]
 }
 
-# ライフサイクル（90日で削除）
+# ライフサイクル（90日で削除） / Lifecycle rule to delete after 90 days.
 resource "aws_s3_bucket_lifecycle_configuration" "alb_logs" {
   bucket = aws_s3_bucket.alb_logs.id
 
@@ -65,7 +65,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "alb_logs" {
     status = "Enabled"
 
     filter {
-      prefix = "alb/" # aws_lb.access_logs.prefix と合わせる
+      prefix = "alb/" # aws_lb.access_logs.prefix と合わせる / Match this with aws_lb.access_logs.prefix.
     }
 
     expiration {

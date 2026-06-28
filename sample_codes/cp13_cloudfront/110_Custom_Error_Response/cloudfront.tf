@@ -10,10 +10,10 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 }
 
 #---------------------------------------
-# データソース: マネージドキャッシュポリシーのIDを取得
+# データソース: マネージドキャッシュポリシーのIDを取得 / Data source: get the managed cache policy ID
 #---------------------------------------
 data "aws_cloudfront_cache_policy" "caching_optimized" {
-  name = "Managed-CachingOptimized" # "CachingOptimized" という名前のマネージドポリシー
+  name = "Managed-CachingOptimized" # "CachingOptimized" という名前のマネージドポリシー / Managed policy named CachingOptimized
 }
 
 #---------------------------------------
@@ -39,11 +39,11 @@ resource "aws_cloudfront_distribution" "cdn" {
 
     compress = true
 
-    # CachingOptimizedマネージドポリシー
+    # CachingOptimizedマネージドポリシー / CachingOptimized managed policy
     cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id
   }
 
-  # カスタムエラーページ設定（例: 404 を error.html に差し替え）
+  # カスタムエラーページ設定（例: 404 を error.html に差し替え） / Custom error page settings, for example replace 404 with error.html
   custom_error_response {
     error_code            = 404
     response_code         = 404

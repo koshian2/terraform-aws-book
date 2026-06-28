@@ -1,4 +1,4 @@
-### データテーブルの作成
+### データテーブルの作成 / Create the data table.
 
 ```sql
 CREATE EXTERNAL TABLE IF NOT EXISTS vpc_flow_logs (
@@ -52,7 +52,7 @@ TBLPROPERTIES (
 );
 ```
 
-### ログを100件取得する
+### ログを100件取得する / Get 100 log records.
 
 ```sql
 SELECT * 
@@ -61,10 +61,10 @@ WHERE day BETWEEN '2025/09/07' AND '2025/09/08'
 LIMIT 100;
 ```
 
-### NATインスタンスに対するアクセス統計を見る
+### NATインスタンスに対するアクセス統計を見る / View access statistics for the NAT instance.
 
 ```sql
--- actionごと（ACCEPT/REJECT）に集計
+-- actionごと（ACCEPT/REJECT）に集計 / Aggregate by action, ACCEPT or REJECT.
 WITH params AS (
   SELECT
     '<nat-instance-private-ip>'                         AS target_ip,
@@ -73,13 +73,13 @@ WITH params AS (
 )
 SELECT
   l.action,                               -- 'ACCEPT' / 'REJECT'
-  COUNT(*)          AS flow_count,        -- 行数（≒フロー数）
+  COUNT(*)          AS flow_count,        -- 行数（≒フロー数） / Number of rows, roughly the number of flows.
   SUM(l.packets)    AS total_packets,
   SUM(l.bytes)      AS total_bytes
 FROM vpc_flow_logs l
 CROSS JOIN params p
-WHERE l.dstaddr = p.target_ip             -- 指定IP「への」トラフィック
-  AND l.log_status = 'OK'                 -- NODATA/SKIPDATA除外
+WHERE l.dstaddr = p.target_ip             -- 指定IP「への」トラフィック / Traffic to the specified IP.
+  AND l.log_status = 'OK'                 -- NODATA/SKIPDATA除外 / Exclude NODATA and SKIPDATA.
   AND l.day BETWEEN date_format(p.from_ts, '%Y/%m/%d')
                  AND date_format(date_add('day', -1, p.to_ts), '%Y/%m/%d')
   AND l.start >= to_unixtime(p.from_ts)
@@ -88,7 +88,7 @@ GROUP BY l.action
 ORDER BY l.action;
 ```
 
-### 拒絶されたトラフィックの送信元のIPアドレスを列挙
+### 拒絶されたトラフィックの送信元のIPアドレスを列挙 / List source IP addresses for rejected traffic.
 
 ```sql
 WITH params AS (
@@ -100,24 +100,24 @@ WITH params AS (
 SELECT
   l.srcaddr                       AS src_ip,
   COUNT(*)                        AS reject_rows
-  -- , SUM(l.packets)             AS total_packets   -- 追加で見たければコメント解除
+  -- , SUM(l.packets)             AS total_packets   -- 追加で見たければコメント解除 / Uncomment this if you also want to see it.
   -- , SUM(l.bytes)               AS total_bytes
 FROM vpc_flow_logs l
 CROSS JOIN params p
 WHERE l.dstaddr = p.target_ip
   AND l.action = 'REJECT'
   AND l.log_status = 'OK'
-  -- パーティション（day）で絞る
+  -- パーティション（day）で絞る / Filter by partition day.
   AND l.day BETWEEN date_format(p.from_ts, '%Y/%m/%d')
                  AND date_format(date_add('day', -1, p.to_ts), '%Y/%m/%d')
-  -- 時刻（epoch秒）で厳密に絞る
+  -- 時刻（epoch秒）で厳密に絞る / Filter strictly by epoch time.
   AND l.start >= to_unixtime(p.from_ts)
   AND l.start <  to_unixtime(p.to_ts)
 GROUP BY l.srcaddr
 ORDER BY reject_rows DESC, src_ip;
 ```
 
-### データテーブルの破棄
+### データテーブルの破棄 / Drop the data table
 
 ```sql
 DROP TABLE vpc_flow_logs;

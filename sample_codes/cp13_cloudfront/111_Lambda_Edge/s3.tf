@@ -1,5 +1,5 @@
 #---------------------------------------
-# ランダムサフィックスでバケット名を一意化
+# ランダムサフィックスでバケット名を一意化 / Make the bucket name unique with a random suffix
 #---------------------------------------
 resource "random_id" "bucket" {
   byte_length = 4
@@ -11,7 +11,7 @@ locals {
 }
 
 #---------------------------------------
-# S3 バケット（パブリックブロック＋OAC 経由のみアクセス）
+# S3 バケット（パブリックブロック＋OAC 経由のみアクセス） / S3 bucket with public access blocked and access only through OAC
 #---------------------------------------
 resource "aws_s3_bucket" "site" {
   bucket = local.bucket_name
@@ -43,7 +43,7 @@ resource "aws_s3_bucket_public_access_block" "site" {
 }
 
 #---------------------------------------
-# error.html だけアップロード
+# error.html だけアップロード / Upload only error.html
 #---------------------------------------
 resource "aws_s3_object" "error" {
   bucket        = aws_s3_bucket.site.id
@@ -55,8 +55,8 @@ resource "aws_s3_object" "error" {
 }
 
 #---------------------------------------
-# S3 バケットポリシー（CloudFront からの GetObject と ListBucket のみ許可）
-# ＊OAC の推奨形式：SourceArn に Distribution ARN を条件指定
+# S3 バケットポリシー（CloudFront からの GetObject と ListBucket のみ許可） / S3 bucket policy that allows only GetObject and ListBucket from CloudFront
+# ＊OAC の推奨形式：SourceArn に Distribution ARN を条件指定 / Recommended OAC form: use the distribution ARN in the SourceArn condition
 #---------------------------------------
 resource "aws_s3_bucket_policy" "allow_cloudfront" {
   bucket = aws_s3_bucket.site.id

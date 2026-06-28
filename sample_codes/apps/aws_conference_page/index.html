@@ -63,6 +63,34 @@
             color: #ff9900;
         }
 
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .lang-switch {
+            display: inline-flex;
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .lang-switch button {
+            background: transparent;
+            border: 0;
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+            padding: 0.4rem 0.7rem;
+            min-width: 44px;
+        }
+
+        .lang-switch button.active {
+            background: #ff9900;
+            color: #232f3e;
+        }
+
         /* モバイルメニューボタン */
         .menu-toggle {
             display: none;
@@ -412,6 +440,10 @@
 
         /* レスポンシブ */
         @media (max-width: 768px) {
+            nav .container {
+                position: relative;
+            }
+
             .menu-toggle {
                 display: block;
             }
@@ -484,14 +516,20 @@
     <nav>
         <div class="container">
             <div class="logo">AWS Cloud Conference 2030</div>
-            <button class="menu-toggle" onclick="toggleMenu()">☰</button>
             <ul class="nav-links" id="navLinks">
-                <li><a href="#home">ホーム</a></li>
-                <li><a href="#features">特徴</a></li>
-                <li><a href="#sessions">セッション</a></li>
-                <li><a href="#venue">会場</a></li>
-                <li><a href="#register">参加登録</a></li>
+                <li><a href="#home" data-i18n="navHome">ホーム</a></li>
+                <li><a href="#features" data-i18n="navFeatures">特徴</a></li>
+                <li><a href="#sessions" data-i18n="navSessions">セッション</a></li>
+                <li><a href="#venue" data-i18n="navVenue">会場</a></li>
+                <li><a href="#register" data-i18n="navRegister">参加登録</a></li>
             </ul>
+            <div class="nav-actions">
+                <div class="lang-switch" aria-label="Language selector">
+                    <button type="button" id="langJa" onclick="setLanguage('ja')" aria-label="日本語に切り替え">JA</button>
+                    <button type="button" id="langEn" onclick="setLanguage('en')" aria-label="Switch to English">EN</button>
+                </div>
+                <button class="menu-toggle" onclick="toggleMenu()" aria-label="Menu">☰</button>
+            </div>
         </div>
     </nav>
 
@@ -500,32 +538,32 @@
         <img src="./hero-background.jpeg" alt="AWS Conference" class="hero-bg">
         <div class="hero-content">
             <h1>AWS Cloud Conference 2030</h1>
-            <p>最新のクラウドテクノロジーとイノベーションを体験</p>
-            <div class="hero-date">2030年12月16日（月）- 17日（火）</div>
+            <p data-i18n="heroLead">最新のクラウドテクノロジーとイノベーションを体験</p>
+            <div class="hero-date" data-i18n="heroDate">2030年12月16日（月）- 17日（火）</div>
             
             <!-- カウントダウンタイマー -->
             <div class="countdown" id="countdown">
                 <div class="countdown-item">
                     <span class="countdown-number" id="days">00</span>
-                    <span class="countdown-label">日</span>
+                    <span class="countdown-label" data-i18n="countDays">日</span>
                 </div>
                 <div class="countdown-item">
                     <span class="countdown-number" id="hours">00</span>
-                    <span class="countdown-label">時間</span>
+                    <span class="countdown-label" data-i18n="countHours">時間</span>
                 </div>
                 <div class="countdown-item">
                     <span class="countdown-number" id="minutes">00</span>
-                    <span class="countdown-label">分</span>
+                    <span class="countdown-label" data-i18n="countMinutes">分</span>
                 </div>
                 <div class="countdown-item">
                     <span class="countdown-number" id="seconds">00</span>
-                    <span class="countdown-label">秒</span>
+                    <span class="countdown-label" data-i18n="countSeconds">秒</span>
                 </div>
             </div>
 
             <div>
-                <a href="#register" class="btn">今すぐ参加登録</a>
-                <a href="#sessions" class="btn btn-secondary">プログラムを見る</a>
+                <a href="#register" class="btn" data-i18n="heroRegister">今すぐ参加登録</a>
+                <a href="#sessions" class="btn btn-secondary" data-i18n="heroProgram">プログラムを見る</a>
             </div>
         </div>
     </section>
@@ -533,44 +571,44 @@
     <!-- 特徴セクション -->
     <section id="features" class="features">
         <div class="container">
-            <h2>カンファレンスの特徴</h2>
-            <p class="subtitle">日本最大級のAWSカンファレンスで最新技術を学ぶ</p>
+            <h2 data-i18n="featuresTitle">カンファレンスの特徴</h2>
+            <p class="subtitle" data-i18n="featuresSubtitle">日本最大級のAWSカンファレンスで最新技術を学ぶ</p>
             
             <div class="features-grid">
                 <div class="feature-card fade-in">
                     <div class="feature-icon">🎯</div>
-                    <h3>50+ のセッション</h3>
-                    <p>AI/ML、サーバーレス、コンテナ、セキュリティなど幅広いトピックを網羅</p>
+                    <h3 data-i18n="feature1Title">50+ のセッション</h3>
+                    <p data-i18n="feature1Text">AI/ML、サーバーレス、コンテナ、セキュリティなど幅広いトピックを網羅</p>
                 </div>
                 
                 <div class="feature-card fade-in">
                     <div class="feature-icon">👥</div>
-                    <h3>業界のエキスパート</h3>
-                    <p>AWS認定のエキスパートや先進企業の実践事例を直接学べます</p>
+                    <h3 data-i18n="feature2Title">業界のエキスパート</h3>
+                    <p data-i18n="feature2Text">AWS認定のエキスパートや先進企業の実践事例を直接学べます</p>
                 </div>
                 
                 <div class="feature-card fade-in">
                     <div class="feature-icon">🤝</div>
-                    <h3>ネットワーキング</h3>
-                    <p>2000人以上の参加者とのネットワーキング機会</p>
+                    <h3 data-i18n="feature3Title">ネットワーキング</h3>
+                    <p data-i18n="feature3Text">2000人以上の参加者とのネットワーキング機会</p>
                 </div>
                 
                 <div class="feature-card fade-in">
                     <div class="feature-icon">💼</div>
-                    <h3>ハンズオンラボ</h3>
-                    <p>実際にAWSサービスを体験できるハンズオントレーニング</p>
+                    <h3 data-i18n="feature4Title">ハンズオンラボ</h3>
+                    <p data-i18n="feature4Text">実際にAWSサービスを体験できるハンズオントレーニング</p>
                 </div>
                 
                 <div class="feature-card fade-in">
                     <div class="feature-icon">🎁</div>
-                    <h3>限定特典</h3>
-                    <p>参加者限定のAWSクレジットと学習リソースを提供</p>
+                    <h3 data-i18n="feature5Title">限定特典</h3>
+                    <p data-i18n="feature5Text">参加者限定のAWSクレジットと学習リソースを提供</p>
                 </div>
                 
                 <div class="feature-card fade-in">
                     <div class="feature-icon">🌟</div>
-                    <h3>認定資格サポート</h3>
-                    <p>AWS認定試験対策セッションと無料の模擬試験</p>
+                    <h3 data-i18n="feature6Title">認定資格サポート</h3>
+                    <p data-i18n="feature6Text">AWS認定試験対策セッションと無料の模擬試験</p>
                 </div>
             </div>
         </div>
@@ -579,50 +617,50 @@
     <!-- セッションセクション -->
     <section id="sessions">
         <div class="container">
-            <h2>主要セッション</h2>
-            <p class="subtitle">最新のAWSサービスと実践的なユースケースを学ぶ</p>
+            <h2 data-i18n="sessionsTitle">主要セッション</h2>
+            <p class="subtitle" data-i18n="sessionsSubtitle">最新のAWSサービスと実践的なユースケースを学ぶ</p>
             
             <div class="sessions-grid">
                 <div class="session-card">
                     <div class="session-time">⏰ 10:00 - 11:00 | Day 1</div>
-                    <h3>基調講演：クラウドの未来とAWSの最新サービス</h3>
-                    <p>AWS Japan代表による最新サービス発表とクラウド戦略</p>
-                    <p><strong>スピーカー:</strong> AWS Japan 代表取締役社長</p>
+                    <h3 data-i18n="session1Title">基調講演：クラウドの未来とAWSの最新サービス</h3>
+                    <p data-i18n="session1Text">AWS Japan代表による最新サービス発表とクラウド戦略</p>
+                    <p><strong data-i18n="speakerLabel">スピーカー:</strong> <span data-i18n="session1Speaker">AWS Japan 代表取締役社長</span></p>
                 </div>
                 
                 <div class="session-card">
                     <div class="session-time">⏰ 11:30 - 12:30 | Day 1</div>
-                    <h3>生成AIとAmazon Bedrock実践ガイド</h3>
-                    <p>Amazon Bedrockを活用した生成AIアプリケーションの構築方法</p>
-                    <p><strong>スピーカー:</strong> AWSソリューションアーキテクト</p>
+                    <h3 data-i18n="session2Title">生成AIとAmazon Bedrock実践ガイド</h3>
+                    <p data-i18n="session2Text">Amazon Bedrockを活用した生成AIアプリケーションの構築方法</p>
+                    <p><strong data-i18n="speakerLabel">スピーカー:</strong> <span data-i18n="session2Speaker">AWSソリューションアーキテクト</span></p>
                 </div>
                 
                 <div class="session-card">
                     <div class="session-time">⏰ 13:30 - 14:30 | Day 1</div>
-                    <h3>サーバーレスアーキテクチャのベストプラクティス</h3>
-                    <p>Lambda、API Gateway、DynamoDBを使った大規模システム構築</p>
-                    <p><strong>スピーカー:</strong> AWS認定アーキテクト</p>
+                    <h3 data-i18n="session3Title">サーバーレスアーキテクチャのベストプラクティス</h3>
+                    <p data-i18n="session3Text">Lambda、API Gateway、DynamoDBを使った大規模システム構築</p>
+                    <p><strong data-i18n="speakerLabel">スピーカー:</strong> <span data-i18n="session3Speaker">AWS認定アーキテクト</span></p>
                 </div>
                 
                 <div class="session-card">
                     <div class="session-time">⏰ 15:00 - 16:00 | Day 1</div>
-                    <h3>コンテナとKubernetes on AWS</h3>
-                    <p>ECS、EKS、Fargateを使ったコンテナ運用の最適化</p>
-                    <p><strong>スピーカー:</strong> DevOpsエンジニア</p>
+                    <h3 data-i18n="session4Title">コンテナとKubernetes on AWS</h3>
+                    <p data-i18n="session4Text">ECS、EKS、Fargateを使ったコンテナ運用の最適化</p>
+                    <p><strong data-i18n="speakerLabel">スピーカー:</strong> <span data-i18n="session4Speaker">DevOpsエンジニア</span></p>
                 </div>
                 
                 <div class="session-card">
                     <div class="session-time">⏰ 10:00 - 11:00 | Day 2</div>
-                    <h3>クラウドセキュリティとコンプライアンス</h3>
-                    <p>AWS Well-Architected Frameworkに基づくセキュリティ対策</p>
-                    <p><strong>スピーカー:</strong> セキュリティスペシャリスト</p>
+                    <h3 data-i18n="session5Title">クラウドセキュリティとコンプライアンス</h3>
+                    <p data-i18n="session5Text">AWS Well-Architected Frameworkに基づくセキュリティ対策</p>
+                    <p><strong data-i18n="speakerLabel">スピーカー:</strong> <span data-i18n="session5Speaker">セキュリティスペシャリスト</span></p>
                 </div>
                 
                 <div class="session-card">
                     <div class="session-time">⏰ 11:30 - 12:30 | Day 2</div>
-                    <h3>データ分析とビッグデータ処理</h3>
-                    <p>Redshift、Athena、Glueを活用したデータレイク構築</p>
-                    <p><strong>スピーカー:</strong> データエンジニア</p>
+                    <h3 data-i18n="session6Title">データ分析とビッグデータ処理</h3>
+                    <p data-i18n="session6Text">Redshift、Athena、Glueを活用したデータレイク構築</p>
+                    <p><strong data-i18n="speakerLabel">スピーカー:</strong> <span data-i18n="session6Speaker">データエンジニア</span></p>
                 </div>
             </div>
         </div>
@@ -631,27 +669,27 @@
     <!-- 会場セクション -->
     <section id="venue" class="venue">
         <div class="container">
-            <h2>会場情報</h2>
-            <p class="subtitle">アクセス抜群の都心会場で開催</p>
+            <h2 data-i18n="venueTitle">会場情報</h2>
+            <p class="subtitle" data-i18n="venueSubtitle">アクセス抜群の都心会場で開催</p>
             
             <div class="venue-content">
                 <img src="./conference-venue.jpeg" alt="Conference Venue" class="venue-image">
                 
                 <div class="venue-details">
-                    <h3>📍 東京国際フォーラム</h3>
-                    <p><strong>住所:</strong> 〒100-0005 東京都千代田区丸の内3丁目5-1</p>
-                    <p><strong>アクセス:</strong></p>
+                    <h3 data-i18n="venueName">📍 東京国際フォーラム</h3>
+                    <p><strong data-i18n="venueAddressLabel">住所:</strong> <span data-i18n="venueAddress">〒100-0005 東京都千代田区丸の内3丁目5-1</span></p>
+                    <p><strong data-i18n="venueAccessLabel">アクセス:</strong></p>
                     <ul style="margin-left: 1.5rem;">
-                        <li>JR有楽町駅より徒歩1分</li>
-                        <li>東京メトロ有楽町駅直結</li>
-                        <li>JR東京駅より徒歩5分</li>
+                        <li data-i18n="venueAccess1">JR有楽町駅より徒歩1分</li>
+                        <li data-i18n="venueAccess2">東京メトロ有楽町駅直結</li>
+                        <li data-i18n="venueAccess3">JR東京駅より徒歩5分</li>
                     </ul>
-                    <p><strong>開催時間:</strong></p>
+                    <p><strong data-i18n="venueHoursLabel">開催時間:</strong></p>
                     <ul style="margin-left: 1.5rem;">
-                        <li>12月16日（月）9:00 - 18:00</li>
-                        <li>12月17日（火）9:00 - 17:00</li>
+                        <li data-i18n="venueHours1">12月16日（月）9:00 - 18:00</li>
+                        <li data-i18n="venueHours2">12月17日（火）9:00 - 17:00</li>
                     </ul>
-                    <p style="margin-top: 1rem;"><strong>受付:</strong> 8:30より開始</p>
+                    <p style="margin-top: 1rem;"><strong data-i18n="venueReceptionLabel">受付:</strong> <span data-i18n="venueReception">8:30より開始</span></p>
                 </div>
             </div>
         </div>
@@ -660,8 +698,8 @@
     <!-- スポンサーセクション -->
     <section id="sponsors" class="sponsors">
         <div class="container">
-            <h2>スポンサー企業</h2>
-            <p class="subtitle">このイベントは以下の企業様のご支援により開催されています</p>
+            <h2 data-i18n="sponsorsTitle">スポンサー企業</h2>
+            <p class="subtitle" data-i18n="sponsorsSubtitle">このイベントは以下の企業様のご支援により開催されています</p>
             
             <div class="sponsors-grid">
                 <div class="sponsor-box">Platinum Sponsor</div>
@@ -677,42 +715,42 @@
     <!-- 参加登録セクション -->
     <section id="register" class="register">
         <div class="container">
-            <h2>参加登録</h2>
-            <p class="subtitle">今すぐ登録して、最新のクラウドテクノロジーを学びましょう</p>
+            <h2 data-i18n="registerTitle">参加登録</h2>
+            <p class="subtitle" data-i18n="registerSubtitle">今すぐ登録して、最新のクラウドテクノロジーを学びましょう</p>
             
             <div class="register-form">
                 <form onsubmit="handleSubmit(event)">
                     <div class="form-group">
-                        <label for="name">お名前 *</label>
-                        <input type="text" id="name" required placeholder="山田 太郎">
+                        <label for="name" data-i18n="formName">お名前 *</label>
+                        <input type="text" id="name" required placeholder="山田 太郎" data-i18n-placeholder="formNamePlaceholder">
                     </div>
                     
                     <div class="form-group">
-                        <label for="email">メールアドレス *</label>
+                        <label for="email" data-i18n="formEmail">メールアドレス *</label>
                         <input type="email" id="email" required placeholder="example@email.com">
                     </div>
                     
                     <div class="form-group">
-                        <label for="company">会社名 *</label>
-                        <input type="text" id="company" required placeholder="株式会社〇〇">
+                        <label for="company" data-i18n="formCompany">会社名 *</label>
+                        <input type="text" id="company" required placeholder="株式会社〇〇" data-i18n-placeholder="formCompanyPlaceholder">
                     </div>
                     
                     <div class="form-group">
-                        <label for="role">役職</label>
-                        <input type="text" id="role" placeholder="エンジニア、マネージャーなど">
+                        <label for="role" data-i18n="formRole">役職</label>
+                        <input type="text" id="role" placeholder="エンジニア、マネージャーなど" data-i18n-placeholder="formRolePlaceholder">
                     </div>
                     
                     <div class="form-group">
-                        <label for="ticket">チケットタイプ *</label>
+                        <label for="ticket" data-i18n="formTicket">チケットタイプ *</label>
                         <select id="ticket" required>
-                            <option value="">選択してください</option>
-                            <option value="early">アーリーバード（無料）</option>
-                            <option value="standard">スタンダード（無料）</option>
-                            <option value="vip">VIPパス（¥10,000）</option>
+                            <option value="" data-i18n="ticketPlaceholder">選択してください</option>
+                            <option value="early" data-i18n="ticketEarly">アーリーバード（無料）</option>
+                            <option value="standard" data-i18n="ticketStandard">スタンダード（無料）</option>
+                            <option value="vip" data-i18n="ticketVip">VIPパス（¥10,000）</option>
                         </select>
                     </div>
                     
-                    <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">登録する</button>
+                    <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;" data-i18n="formSubmit">登録する</button>
                 </form>
             </div>
         </div>
@@ -724,31 +762,31 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>AWS Cloud Conference</h3>
-                    <p>日本最大級のAWSユーザーカンファレンス。最新のクラウドテクノロジーとイノベーションを体験できる2日間のイベントです。</p>
+                    <p data-i18n="footerAbout">日本最大級のAWSユーザーカンファレンス。最新のクラウドテクノロジーとイノベーションを体験できる2日間のイベントです。</p>
                 </div>
                 
                 <div class="footer-section">
-                    <h3>リンク</h3>
+                    <h3 data-i18n="footerLinks">リンク</h3>
                     <ul>
-                        <li><a href="#home">ホーム</a></li>
-                        <li><a href="#features">特徴</a></li>
-                        <li><a href="#sessions">セッション</a></li>
-                        <li><a href="#venue">会場</a></li>
-                        <li><a href="#register">参加登録</a></li>
+                        <li><a href="#home" data-i18n="navHome">ホーム</a></li>
+                        <li><a href="#features" data-i18n="navFeatures">特徴</a></li>
+                        <li><a href="#sessions" data-i18n="navSessions">セッション</a></li>
+                        <li><a href="#venue" data-i18n="navVenue">会場</a></li>
+                        <li><a href="#register" data-i18n="navRegister">参加登録</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-section">
-                    <h3>お問い合わせ</h3>
+                    <h3 data-i18n="footerContact">お問い合わせ</h3>
                     <ul>
                         <li>📧 <a href="mailto:info@awsconference.jp"><span class="__cf_email__">info@awsconference.jp</span></a></li>
                         <li>📞 03-1234-5678</li>
-                        <li>🕐 平日 10:00-18:00</li>
+                        <li data-i18n="footerHours">🕐 平日 10:00-18:00</li>
                     </ul>
                 </div>
                 
                 <div class="footer-section">
-                    <h3>フォローする</h3>
+                    <h3 data-i18n="footerFollow">フォローする</h3>
                     <ul>
                         <li><a href="#">Twitter</a></li>
                         <li><a href="#">Facebook</a></li>
@@ -764,7 +802,227 @@
         </div>
     </footer>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
+        const translations = {
+            ja: {
+                pageTitle: 'AWS Cloud Conference 2030 | 日本最大級のクラウドカンファレンス',
+                navHome: 'ホーム',
+                navFeatures: '特徴',
+                navSessions: 'セッション',
+                navVenue: '会場',
+                navRegister: '参加登録',
+                heroLead: '最新のクラウドテクノロジーとイノベーションを体験',
+                heroDate: '2030年12月16日（月）- 17日（火）',
+                countDays: '日',
+                countHours: '時間',
+                countMinutes: '分',
+                countSeconds: '秒',
+                heroRegister: '今すぐ参加登録',
+                heroProgram: 'プログラムを見る',
+                featuresTitle: 'カンファレンスの特徴',
+                featuresSubtitle: '日本最大級のAWSカンファレンスで最新技術を学ぶ',
+                feature1Title: '50+ のセッション',
+                feature1Text: 'AI/ML、サーバーレス、コンテナ、セキュリティなど幅広いトピックを網羅',
+                feature2Title: '業界のエキスパート',
+                feature2Text: 'AWS認定のエキスパートや先進企業の実践事例を直接学べます',
+                feature3Title: 'ネットワーキング',
+                feature3Text: '2000人以上の参加者とのネットワーキング機会',
+                feature4Title: 'ハンズオンラボ',
+                feature4Text: '実際にAWSサービスを体験できるハンズオントレーニング',
+                feature5Title: '限定特典',
+                feature5Text: '参加者限定のAWSクレジットと学習リソースを提供',
+                feature6Title: '認定資格サポート',
+                feature6Text: 'AWS認定試験対策セッションと無料の模擬試験',
+                sessionsTitle: '主要セッション',
+                sessionsSubtitle: '最新のAWSサービスと実践的なユースケースを学ぶ',
+                speakerLabel: 'スピーカー:',
+                session1Title: '基調講演：クラウドの未来とAWSの最新サービス',
+                session1Text: 'AWS Japan代表による最新サービス発表とクラウド戦略',
+                session1Speaker: 'AWS Japan 代表取締役社長',
+                session2Title: '生成AIとAmazon Bedrock実践ガイド',
+                session2Text: 'Amazon Bedrockを活用した生成AIアプリケーションの構築方法',
+                session2Speaker: 'AWSソリューションアーキテクト',
+                session3Title: 'サーバーレスアーキテクチャのベストプラクティス',
+                session3Text: 'Lambda、API Gateway、DynamoDBを使った大規模システム構築',
+                session3Speaker: 'AWS認定アーキテクト',
+                session4Title: 'コンテナとKubernetes on AWS',
+                session4Text: 'ECS、EKS、Fargateを使ったコンテナ運用の最適化',
+                session4Speaker: 'DevOpsエンジニア',
+                session5Title: 'クラウドセキュリティとコンプライアンス',
+                session5Text: 'AWS Well-Architected Frameworkに基づくセキュリティ対策',
+                session5Speaker: 'セキュリティスペシャリスト',
+                session6Title: 'データ分析とビッグデータ処理',
+                session6Text: 'Redshift、Athena、Glueを活用したデータレイク構築',
+                session6Speaker: 'データエンジニア',
+                venueTitle: '会場情報',
+                venueSubtitle: 'アクセス抜群の都心会場で開催',
+                venueName: '📍 東京国際フォーラム',
+                venueAddressLabel: '住所:',
+                venueAddress: '〒100-0005 東京都千代田区丸の内3丁目5-1',
+                venueAccessLabel: 'アクセス:',
+                venueAccess1: 'JR有楽町駅より徒歩1分',
+                venueAccess2: '東京メトロ有楽町駅直結',
+                venueAccess3: 'JR東京駅より徒歩5分',
+                venueHoursLabel: '開催時間:',
+                venueHours1: '12月16日（月）9:00 - 18:00',
+                venueHours2: '12月17日（火）9:00 - 17:00',
+                venueReceptionLabel: '受付:',
+                venueReception: '8:30より開始',
+                sponsorsTitle: 'スポンサー企業',
+                sponsorsSubtitle: 'このイベントは以下の企業様のご支援により開催されています',
+                registerTitle: '参加登録',
+                registerSubtitle: '今すぐ登録して、最新のクラウドテクノロジーを学びましょう',
+                formName: 'お名前 *',
+                formNamePlaceholder: '山田 太郎',
+                formEmail: 'メールアドレス *',
+                formCompany: '会社名 *',
+                formCompanyPlaceholder: '株式会社〇〇',
+                formRole: '役職',
+                formRolePlaceholder: 'エンジニア、マネージャーなど',
+                formTicket: 'チケットタイプ *',
+                ticketPlaceholder: '選択してください',
+                ticketEarly: 'アーリーバード（無料）',
+                ticketStandard: 'スタンダード（無料）',
+                ticketVip: 'VIPパス（¥10,000）',
+                formSubmit: '登録する',
+                footerAbout: '日本最大級のAWSユーザーカンファレンス。最新のクラウドテクノロジーとイノベーションを体験できる2日間のイベントです。',
+                footerLinks: 'リンク',
+                footerContact: 'お問い合わせ',
+                footerHours: '🕐 平日 10:00-18:00',
+                footerFollow: 'フォローする',
+                alertTitle: 'ご登録ありがとうございます！',
+                alertName: 'お名前',
+                alertEmail: 'メール',
+                alertCompany: '会社名',
+                alertMessage: '確認メールを送信しました。'
+            },
+            en: {
+                pageTitle: 'AWS Cloud Conference 2030 | One of Japan\'s largest cloud conferences',
+                navHome: 'Home',
+                navFeatures: 'Highlights',
+                navSessions: 'Sessions',
+                navVenue: 'Venue',
+                navRegister: 'Register',
+                heroLead: 'Experience the latest cloud technology and innovation',
+                heroDate: 'December 16 (Mon) - 17 (Tue), 2030',
+                countDays: 'Days',
+                countHours: 'Hours',
+                countMinutes: 'Minutes',
+                countSeconds: 'Seconds',
+                heroRegister: 'Register now',
+                heroProgram: 'View program',
+                featuresTitle: 'Conference Highlights',
+                featuresSubtitle: 'Learn the latest technology at one of Japan\'s largest AWS conferences',
+                feature1Title: '50+ sessions',
+                feature1Text: 'Covers a wide range of topics, including AI/ML, serverless, containers, and security',
+                feature2Title: 'Industry experts',
+                feature2Text: 'Learn directly from AWS-certified experts and advanced customer case studies',
+                feature3Title: 'Networking',
+                feature3Text: 'Meet and connect with more than 2,000 attendees',
+                feature4Title: 'Hands-on labs',
+                feature4Text: 'Hands-on training where you can try AWS services yourself',
+                feature5Title: 'Exclusive benefits',
+                feature5Text: 'AWS credits and learning resources for attendees only',
+                feature6Title: 'Certification support',
+                feature6Text: 'AWS Certification prep sessions and free practice exams',
+                sessionsTitle: 'Featured Sessions',
+                sessionsSubtitle: 'Learn the latest AWS services and practical use cases',
+                speakerLabel: 'Speaker:',
+                session1Title: 'Keynote: The future of cloud and the latest AWS services',
+                session1Text: 'Latest service announcements and cloud strategy from the head of AWS Japan',
+                session1Speaker: 'President, AWS Japan',
+                session2Title: 'Generative AI and Amazon Bedrock practical guide',
+                session2Text: 'How to build generative AI applications with Amazon Bedrock',
+                session2Speaker: 'AWS Solutions Architect',
+                session3Title: 'Best practices for serverless architecture',
+                session3Text: 'Building large-scale systems with Lambda, API Gateway, and DynamoDB',
+                session3Speaker: 'AWS Certified Architect',
+                session4Title: 'Containers and Kubernetes on AWS',
+                session4Text: 'Optimizing container operations with ECS, EKS, and Fargate',
+                session4Speaker: 'DevOps Engineer',
+                session5Title: 'Cloud security and compliance',
+                session5Text: 'Security measures based on the AWS Well-Architected Framework',
+                session5Speaker: 'Security Specialist',
+                session6Title: 'Data analytics and big data processing',
+                session6Text: 'Building a data lake with Redshift, Athena, and Glue',
+                session6Speaker: 'Data Engineer',
+                venueTitle: 'Venue',
+                venueSubtitle: 'Held at a central Tokyo venue with excellent access',
+                venueName: '📍 Tokyo International Forum',
+                venueAddressLabel: 'Address:',
+                venueAddress: '3-5-1 Marunouchi, Chiyoda-ku, Tokyo 100-0005',
+                venueAccessLabel: 'Access:',
+                venueAccess1: '1 minute walk from JR Yurakucho Station',
+                venueAccess2: 'Directly connected to Tokyo Metro Yurakucho Station',
+                venueAccess3: '5 minute walk from JR Tokyo Station',
+                venueHoursLabel: 'Event hours:',
+                venueHours1: 'December 16 (Mon), 9:00 - 18:00',
+                venueHours2: 'December 17 (Tue), 9:00 - 17:00',
+                venueReceptionLabel: 'Reception:',
+                venueReception: 'Opens at 8:30',
+                sponsorsTitle: 'Sponsors',
+                sponsorsSubtitle: 'This event is made possible with support from the following companies',
+                registerTitle: 'Registration',
+                registerSubtitle: 'Register now and learn the latest cloud technology',
+                formName: 'Name *',
+                formNamePlaceholder: 'Taro Yamada',
+                formEmail: 'Email address *',
+                formCompany: 'Company *',
+                formCompanyPlaceholder: 'Example Inc.',
+                formRole: 'Role',
+                formRolePlaceholder: 'Engineer, manager, etc.',
+                formTicket: 'Ticket type *',
+                ticketPlaceholder: 'Please select',
+                ticketEarly: 'Early bird (free)',
+                ticketStandard: 'Standard (free)',
+                ticketVip: 'VIP pass (¥10,000)',
+                formSubmit: 'Register',
+                footerAbout: 'One of Japan\'s largest AWS user conferences. A two-day event where you can experience the latest cloud technology and innovation.',
+                footerLinks: 'Links',
+                footerContact: 'Contact',
+                footerHours: '🕐 Weekdays 10:00-18:00',
+                footerFollow: 'Follow us',
+                alertTitle: 'Thank you for registering!',
+                alertName: 'Name',
+                alertEmail: 'Email',
+                alertCompany: 'Company',
+                alertMessage: 'A confirmation email has been sent.'
+            }
+        };
+
+        let currentLanguage = localStorage.getItem('awsConferenceLanguage') || 'ja';
+
+        function setLanguage(language) {
+            currentLanguage = translations[language] ? language : 'ja';
+            localStorage.setItem('awsConferenceLanguage', currentLanguage);
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLanguage];
+            document.documentElement.lang = currentLanguage;
+            document.title = t.pageTitle;
+
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (t[key]) {
+                    element.textContent = t[key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-i18n-placeholder');
+                if (t[key]) {
+                    element.setAttribute('placeholder', t[key]);
+                }
+            });
+
+            document.getElementById('langJa').classList.toggle('active', currentLanguage === 'ja');
+            document.getElementById('langEn').classList.toggle('active', currentLanguage === 'en');
+            document.getElementById('langJa').setAttribute('aria-pressed', String(currentLanguage === 'ja'));
+            document.getElementById('langEn').setAttribute('aria-pressed', String(currentLanguage === 'en'));
+        }
+
         // メニュートグル
         function toggleMenu() {
             const navLinks = document.getElementById('navLinks');
@@ -820,8 +1078,10 @@
             const role = document.getElementById('role').value;
             const ticket = document.getElementById('ticket').value;
             
+            const t = translations[currentLanguage];
+
             // ここで実際のAPI呼び出しを行います
-            alert(`ご登録ありがとうございます！\n\nお名前: ${name}\nメール: ${email}\n会社名: ${company}\n\n確認メールを送信しました。`);
+            alert(`${t.alertTitle}\n\n${t.alertName}: ${name}\n${t.alertEmail}: ${email}\n${t.alertCompany}: ${company}\n\n${t.alertMessage}`);
             
             // フォームをリセット
             event.target.reset();
@@ -849,6 +1109,8 @@
             el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
             observer.observe(el);
         });
+
+        applyLanguage();
     </script>
 </body>
 </html>

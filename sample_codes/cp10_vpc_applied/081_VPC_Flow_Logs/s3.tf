@@ -1,4 +1,4 @@
-# ---- フローログ出力用 S3 バケット ----
+# ---- フローログ出力用 S3 バケット ---- / S3 bucket for Flow Logs output
 resource "random_string" "suffix" {
   length  = 6
   lower   = true
@@ -15,12 +15,12 @@ resource "aws_s3_bucket" "flow_logs" {
   }
 }
 
-# アカウントIDやリージョン情報を取得
+# アカウントIDやリージョン情報を取得 / Get account ID and Region information
 data "aws_caller_identity" "this" {}
 data "aws_region" "this" {}
 data "aws_partition" "this" {}
 
-# VPCフローログのバケットポリシー
+# VPCフローログのバケットポリシー / Bucket policy for VPC Flow Logs
 data "aws_iam_policy_document" "flow_logs" {
   statement {
     sid = "AWSLogDeliveryWrite"
@@ -70,13 +70,13 @@ data "aws_iam_policy_document" "flow_logs" {
   }
 }
 
-# バケットポリシーを関連付け
+# バケットポリシーを関連付け / Attach the bucket policy
 resource "aws_s3_bucket_policy" "flow_logs" {
   bucket = aws_s3_bucket.flow_logs.id
   policy = data.aws_iam_policy_document.flow_logs.json
 }
 
-# S3ライフサイクルルール（90日で削除）
+# S3ライフサイクルルール（90日で削除） / S3 lifecycle rule to delete objects after 90 days
 resource "aws_s3_bucket_lifecycle_configuration" "flow_logs" {
   bucket = aws_s3_bucket.flow_logs.id
 
@@ -84,7 +84,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "flow_logs" {
     id     = "expire-flow-logs-after-90-days"
     status = "Enabled"
 
-    # Flow Logs の既定保存先だけ対象
+    # Flow Logs の既定保存先だけ対象 / Apply only to the default Flow Logs destination
     filter {
       prefix = "AWSLogs/${data.aws_caller_identity.this.account_id}/vpcflowlogs/"
     }

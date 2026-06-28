@@ -1,4 +1,4 @@
-# ---- ALB(東京) 用 ACM (origin.example.com) ----
+# ---- ALB(東京) 用 ACM (origin.example.com) ---- / ACM certificate for ALB in Tokyo.
 resource "aws_acm_certificate" "alb_cert" {
   domain_name       = local.origin_fqdn
   validation_method = "DNS"
@@ -25,7 +25,7 @@ resource "aws_acm_certificate_validation" "alb_cert" {
   validation_record_fqdns = [for r in aws_route53_record.alb_cert_validation : r.fqdn]
 }
 
-# ---- CloudFront(バージニア北部) 用 ACM (viewer_domain_name) ----
+# ---- CloudFront(バージニア北部) 用 ACM (viewer_domain_name) ---- / ACM certificate for CloudFront in us-east-1.
 resource "aws_acm_certificate" "cf_cert" {
   provider          = aws.us_east_1
   domain_name       = var.viewer_domain_name
