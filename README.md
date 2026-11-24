@@ -16,6 +16,24 @@
 * Booth: https://koshian2.booth.pm/items/7651479
 * 範囲：Chapter 09～13
 
+### Terraformで学ぶAWS（３）：AIエージェント編
+* Booth: https://koshian2.booth.pm/items/9171831
+* 技術書典: https://techbookfest.org/product/ibiuM3Q3PjcHaLQpukE7Pt
+* Amazon: https://www.amazon.co.jp/dp/B0HS3YZ292
+* 範囲：Chapter 14～19
+
+## 書籍（英語版）
+
+### Terraforming AWS, Vol. 1: Serverless Foundations
+* Amazon (Kindle): https://www.amazon.com/dp/B0GZKL7B79
+* Amazon (Paperback): https://www.amazon.com/dp/B0H1GLTSGN
+* 範囲：Chapter 01～08
+
+### Terraforming AWS, Vol. 2: VPC and EC2 Fundamentals
+* Amazon (Kindle): https://www.amazon.co.jp/dp/B0HBMD7N83
+* Amazon (Paperback): https://www.amazon.com/dp/B0HBMXY6JZ
+* 範囲：Chapter 09～13
+
 本書の著作権は著者（@koshian2）が保持しますが、本リポジトリのコードはMITライセンスで利用できます。
 
 The copyright of this book is retained by the author (@koshian2), but the code in this repository is available under the MIT license.
