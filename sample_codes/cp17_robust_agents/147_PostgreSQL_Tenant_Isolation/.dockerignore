@@ -1,4 +1,4 @@
 *
-!requirements.txt
+!pyproject.toml
 !scripts/
 !scripts/verify.py

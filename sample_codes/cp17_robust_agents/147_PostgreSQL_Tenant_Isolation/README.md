@@ -66,7 +66,7 @@ RLS用のPython処理は、認証済みの所属を受け取るアプリケー�
 - `sql/01-init.sql`：デモデータ、DBユーザー、RLS、ビュー、権限。
 - `scripts/verify.py`：両方式の実アクセス検証とJSON保存。
 - `Dockerfile`：Python 3.14の実行環境。
-- `pyproject.toml`・`requirements.txt`：依存定義と固定済みのコンテナ用依存一覧。
+- `pyproject.toml`：コンテナ用の依存定義。Dockerビルド時にハッシュ付きの依存一覧を生成します。
 - `commands.sh`：実行・停止・片付け。
 
 ## 参考

@@ -2,4 +2,3 @@
 *.sql text eol=lf
 *.yaml text eol=lf
 Dockerfile text eol=lf
-requirements.txt text eol=lf
