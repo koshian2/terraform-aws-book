@@ -12,9 +12,9 @@ Codex / Claude Code / Python
   → AgentCore Runtime（FastMCP）：デモ受付結果を返す
 ```
 
-Request InterceptorはPolicyより先に実行されます。商品条件が通っても、VIP資格がなければRuntimeへは進みません。Interceptorが拒否応答を返す場合は、その時点で処理を終了します。[AWSの評価順序の説明](https://aws.amazon.com/blogs/machine-learning/secure-ai-agents-with-policy-and-lambda-interceptors-in-amazon-bedrock-agentcore-gateway/)
+Request InterceptorはPolicyより先に実行されます。商品条件を通過しても、VIP資格がなければRuntimeには進みません。Interceptorが拒否応答を返す場合は、その時点で処理を終了します（詳細は[AWSの評価順序の説明](https://aws.amazon.com/blogs/machine-learning/secure-ai-agents-with-policy-and-lambda-interceptors-in-amazon-bedrock-agentcore-gateway/)を参照）。
 
-MCPツールはRuntimeに1つ公開し、GatewayのリモートMCPへHTTPで接続します。Runtimeへの直接呼び出しはGatewayロール以外を拒否します。
+MCPツールはRuntimeに1つ公開し、GatewayのリモートMCPにHTTPで接続します。Runtimeへの直接呼び出しはGatewayロール以外を拒否します。
 
 | 担当 | 検査すること |
 | --- | --- |
@@ -27,7 +27,7 @@ MCPツールはRuntimeに1つ公開し、GatewayのリモートMCPへHTTPで接�
 
 ## 商品データと期待結果
 
-`app/products.json`をLambdaへ同梱します。受付開始を含み、受付終了を含まないUTCの期間で比較します。時刻はLambda側で取得し、呼び出し元から指定させません。
+`app/products.json`をLambdaに同梱します。受付開始を含み、受付終了を含まないUTCの期間で比較します。時刻はLambda側で取得し、呼び出し元から指定させません。
 
 | 会員 | 商品 | 条件 | 期待結果 |
 | --- | --- | --- | --- |
@@ -44,11 +44,11 @@ MCPツールはRuntimeに1つ公開し、GatewayのリモートMCPへHTTPで接�
 
 Python 3.14、uv、Terraform 1.12以上2未満、AWS CLIを使用します。FastMCPは4.1.1、AWSプロバイダーは6.66.0です。AWSプロファイルは`develop`、リージョンは東京が既定です。変更する場合は`terraform/variables.tf`を編集します。
 
-サンプル直下でcommands.shを区間ごとに実行してください。Runtime用ZIPとLambda用ZIPをビルドしてからTerraformを適用します。GatewayのRuntime接続前には認可反映のため60秒待機します。反映を保証する値ではないため、ターゲット登録でAuthorization errorになった場合は、少し時間を置いてplan・applyを再実行してください。
+サンプル直下でcommands.shをセクションごとに実行してください。Runtime用ZIPとLambda用ZIPをビルドしてからTerraformを適用します。GatewayのRuntime接続前には認可反映のため60秒待機します。反映を保証する値ではないため、ターゲット登録でAuthorization errorになった場合は、少し時間を置いてplan・applyを再実行してください。
 
-`regular`と`vip`の2ユーザーを作成し、それぞれ指定グループへ登録します。パスワードは対話入力で、Terraformには保存しません。ユーザー作成後にグループを変更した場合は、ログインし直して新しいトークンを取得してください。
+`regular`と`vip`の2ユーザーを作成し、それぞれ指定グループに登録します。パスワードは対話入力で、Terraformには保存しません。ユーザー作成後にグループを変更した場合は、ログインし直して新しいトークンを取得してください。
 
-Pythonクライアントはユーザーの取り違えを防ぐため、各検証前にCognitoのブラウザセッションを終了します。表示されたユーザー名でログインしてください。一般会員はAを1回、VIPはA・B・Cを各1回呼び、期待結果と比較します。拒否後の自動再試行はしません。トークンはメモリにのみ保持します。
+Pythonクライアントはユーザーの取り違えを防ぐため、各検証前にCognitoのブラウザセッションを終了します。表示されたユーザー名でログインしてください。一般会員はAを1回、VIPはA・B・Cを各1回呼び出し、期待結果と比較します。拒否後の自動再試行はしません。トークンはメモリにのみ保持します。
 
 | 応答 | 記録上の判定 |
 | --- | --- |
@@ -56,7 +56,7 @@ Pythonクライアントはユーザーの取り違えを防ぐため、各検�
 | Interceptor独自のJSON-RPCエラー`-32048` | `not_presale_product`などの理由 |
 | Runtimeの正常結果 | `demo_accepted`、`persisted: false` |
 
-HTTP 200だけで成功とせず、JSON-RPCのエラーも判別します。結果は`results/regular-日時.json`と`results/vip-日時.json`に保存します。想定外の通信・認証エラーは成功扱いしません。Request Interceptorの応答は、Gatewayの`transformedGatewayResponse`契約を使います。[AWSのInterceptor入出力仕様](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-interceptors-types.html)
+HTTP 200だけで成功とせず、JSON-RPCのエラーも判別します。結果は`results/regular-日時.json`と`results/vip-日時.json`に保存します。想定外の通信・認証エラーは成功扱いしません。Request Interceptorの応答は、Gatewayの`transformedGatewayResponse`契約を使います（詳細は[AWSのInterceptor入出力仕様](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-interceptors-types.html)を参照）。
 
 LambdaのCloudWatch Logsには商品条件の判定、Runtimeのログには`demo_reservation_accepted`を出します。認証トークンやイベント全体はログに出しません。この節の検証にTransaction Searchの設定は不要です。
 
@@ -74,16 +74,16 @@ VIPでのサンプルプロンプト:
 
 一般会員ではPolicyによってツール一覧から予約ツールが見えなくなる場合があります。そのため、既知のツール名への直接呼び出しが拒否される確認はPythonクライアントで行います。会員を切り替える場合はエージェント側のMCP認証とCognitoのブラウザセッションの両方を終了し、再ログインしてください。Codexの切り替え手順はcommands.shにあります。
 
-## ファイルと片付け
+## ファイルと後片付け
 
 | 場所 | 内容 |
 | --- | --- |
 | `app/server.py` | Runtimeの予約ツール |
 | `app/interceptor.py`・`products.json` | 実行前の商品検査と固定カタログ |
 | `terraform/` | Cognito、Policy、Gateway、Lambda、Runtime |
-| `scripts/` | ビルド、認証・設定、比較実行、片付け |
+| `scripts/` | ビルド、認証・設定、比較実行、後片付け |
 | `results/` | ローカル記録（Git管理対象外） |
 
-片付けはcommands.sh末尾の手順を使用します。Terraform削除前に対象を記録し、削除後にRuntimeのログとRuntime・GatewayのWorkload Identityを片付けます。LambdaのログはTerraformで削除します。
+後片付けはcommands.sh末尾の手順を使用します。Terraform削除前に対象を記録し、削除後にRuntimeのログとRuntime・GatewayのWorkload Identityも削除します。LambdaのログはTerraformで削除します。
 
 この例は入口での認可を比較する教材です。実際に予約を保存するシステムでは、受付終了や在庫などの業務条件を、更新処理側でも一貫して保証する必要があります。

@@ -33,7 +33,7 @@ flowchart LR
 - サンプリング率は教材用に100%、セッションの評価用アイドル時間は1分です。Runtimeのアイドル時間（5分）とは別設定です。
 - Strandsが会話・モデル・ツールのスパンを生成し、ADOTをPythonライブラリとして組み込みます。Collectorのサイドカーは不要です。
 - スパンと会話内容をRuntime専用ロググループに保存します。評価設定は専用ロググループと`service.name`を指定し、評価実行ロールの読み取りも専用ログに限定します。
-- `bootstrap.py`でRuntimeが渡すロググループを読み、OTLPの送信ヘッダーに設定します。X-Rayからそのロググループへの書き込みはTerraformのリソースポリシーで許可します。`AWS_GENAI_CONTENT_EXTRACTION_OPT_OUT=true`により、会話内容を別イベントへ分離せずスパン内に残します。
+- `bootstrap.py`でRuntimeが渡すロググループを読み、OTLPの送信ヘッダーに設定します。X-Rayからそのロググループへの書き込みはTerraformのリソースポリシーで許可します。`AWS_GENAI_CONTENT_EXTRACTION_OPT_OUT=true`により、会話内容を別イベントに分離せずスパン内に残します。
 - 評価は非同期です。1分後に必ず完了するという意味ではなく、到着までさらに時間がかかります。
 - 評価スコアの差は保証しません。会話全体では条件を落としていても、単独の回答としては確認質問が有用と評価されることがあります。点数と理由、実際の会話を併せて読みます。
 
@@ -43,7 +43,7 @@ Python 3.14、uv、Terraform、AWS CLI、AWSの`develop`プロファイルを用
 
 対象アカウント・リージョンでCloudWatch Transaction Searchを有効にしておきます。既存設定があれば再設定は不要です。Terraformは共有の設定を変更しません。
 
-実行コマンドは`commands.sh`にまとめています。WindowsはGit Bash、macOSはターミナルからサンプル直下で実行します。Cognitoやブラウザでのログインはなく、PythonからAWS認証情報でRuntimeを呼びます。
+実行コマンドは`commands.sh`にまとめています。WindowsはGit Bash、macOSはターミナルからサンプル直下で実行します。Cognitoやブラウザでのログインはなく、PythonからAWS認証情報でRuntimeを呼び出します。
 
 `commands.sh`はデプロイ後に相談を実行し、オンライン評価の到着を最大15分待ちます。到着が遅れた場合は`observe.py`の行だけ再実行してください。`commands.sh`全体の再実行は新しい会話を作り、モデル呼び出し・評価も再度発生します。
 
@@ -54,7 +54,7 @@ Python 3.14、uv、Terraform、AWS CLI、AWSの`develop`プロファイルを用
 - `observe.py`は保存された呼び出し記録に対応する評価を取得するだけで、モデルや評価APIを直接呼び出しません。
 - PASSは必要な評価結果が到着したことを表します。「修正後の点数が必ず高い」「回答の正しさが保証された」という意味ではありません。
 
-GUIでは東京リージョンのCloudWatchで **GenAI Observability → Bedrock AgentCore → 対象エージェント／DEFAULT → Evaluations**を開きます。評価の集計からセッション・トレースへ進み、低評価の理由と元の会話・ツール呼び出しを照合します。評価結果のロググループは評価設定の詳細にも表示されます。
+GUIでは東京リージョンのCloudWatchで **GenAI Observability → Bedrock AgentCore → 対象エージェント／DEFAULT → Evaluations**を開きます。評価の集計からセッション・トレースに進み、低評価の理由と元の会話・ツール呼び出しを照合します。評価結果のロググループは評価設定の詳細にも表示されます。
 
 ### 実測例
 
@@ -77,14 +77,14 @@ GUIでは東京リージョンのCloudWatchで **GenAI Observability → Bedrock
 | --- | --- |
 | `app/server.py` | Strandsエージェント、2つのツール、履歴保持の比較 |
 | `app/bootstrap.py` | ADOTの初期化後にHTTPサーバーを起動 |
-| `terraform/main.tf` | ZIP配置のRuntime、実行ロール、コード保存先 |
+| `terraform/main.tf` | ZIPデプロイのRuntime、実行ロール、コード保存先 |
 | `terraform/evaluations.tf` | 評価実行ロール、組み込み評価器、サンプリング・アイドル設定 |
 | `scripts/client.py` | 同じ相談を2種類の実装で実行し、応答を保存 |
 | `scripts/observe.py` | オンライン評価の到着確認と記録 |
 | `scripts/logs.py` | 自動作成されるRuntimeログとの競合を避けて保持期間を設定 |
-| `scripts/cleanup.py` | 削除対象の記録と自動生成リソースの片付け |
+| `scripts/cleanup.py` | 削除対象の記録と自動生成リソースの削除 |
 
-## 停止と片付け
+## 停止と後片付け
 
 評価の一時停止とリソース削除も`commands.sh`末尾にあります。評価停止だけではRuntimeは残ります。削除前に対象を記録し、Terraform削除後に専用ログとWorkload Identityを削除します。共有のTransaction Search設定は残します。
 

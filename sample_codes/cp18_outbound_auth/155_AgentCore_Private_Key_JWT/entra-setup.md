@@ -9,10 +9,10 @@
 | アプリ名の例 | 役割 | terraform.tfvarsの項目 |
 |---|---|---|
 | `entra-graph-pkjwt-api` | OBOの中間API | `api_client_id` |
-| `entra-graph-pkjwt-m2m` | アプリ権限でGraphを呼ぶ | `m2m_client_id` |
+| `entra-graph-pkjwt-m2m` | アプリ権限でGraphを呼び出す | `m2m_client_id` |
 | `entra-graph-obo-client`（前のOBOサンプルから再利用）または新規の`entra-graph-pkjwt-client` | Pythonで利用者がログインする公開クライアント | `local_client_id` |
 
-**前のOBOサンプルの`entra-graph-obo-client`を再利用する場合、`local_client_id`は前のサンプルと同じ値です。** 以下の中間APIを準備した後、「既存の公開クライアントを再利用する場合」へ進んでください。
+**前のOBOサンプルの`entra-graph-obo-client`を再利用する場合、`local_client_id`は前のサンプルと同じ値です。** 以下の中間APIを準備した後、「既存の公開クライアントを再利用する場合」に進んでください。
 
 ## 中間APIアプリ
 
@@ -27,7 +27,7 @@
 ### 既存の公開クライアントを再利用する場合
 
 1. Entraの「アプリの登録」で、前のOBOサンプルの`entra-graph-obo-client`を開きます。
-2. 「概要」の**アプリケーション（クライアント）ID**を、今回の`terraform/terraform.tfvars`の`local_client_id`へ入力します。
+2. 「概要」の**アプリケーション（クライアント）ID**を、今回の`terraform/terraform.tfvars`の`local_client_id`に入力します。
 3. 「認証」で、デスクトップ用のリダイレクトURIに`http://localhost`が登録されていることを確認します。
 4. 「APIのアクセス許可 → アクセス許可の追加 → 自分のAPI」から、今回作成した`entra-graph-pkjwt-api`を選び、`access_as_user`を追加します。
 5. 「管理者の同意を与えます」を実行し、追加したアクセス許可に同意済みであることを確認します。既に追加・同意済みなら再設定は不要です。
@@ -36,7 +36,7 @@
 
 ### 新しく公開クライアントを作る場合
 
-1. 新規のシングルテナントアプリ（例：`entra-graph-pkjwt-client`）を登録し、所有者に管理者を登録します。このアプリのクライアントIDを`local_client_id`へ設定します。
+1. 新規のシングルテナントアプリ（例：`entra-graph-pkjwt-client`）を登録し、所有者に管理者を登録します。このアプリのクライアントIDを`local_client_id`に設定します。
 2. 認証の「モバイル アプリケーションとデスクトップ アプリケーション」で`http://localhost`を登録します。PythonのMSALがログインを受け取ります。
 3. APIのアクセス許可で、自分のAPIから中間APIの`access_as_user`を追加し、管理者同意を付与します。
 4. 公開クライアントのためシークレットや証明書は登録しません。
@@ -49,7 +49,7 @@
 
 ## KMSと証明書
 
-KMS鍵は`commands.sh`の前半で作成されるため、事前に手動作成する必要はありません。先に入力するのは、鍵で証明書へ署名する**既存の実行者**のARNです。
+KMS鍵は`commands.sh`の前半で作成されるため、事前に手動作成する必要はありません。先に入力するのは、鍵で証明書に署名する**既存の実行者**のARNです。
 
 1. `terraform/keys/terraform.tfvars`の`certificate_signer_arn`に、AWSプロファイルで使用するIAMロールまたはIAMユーザーのARNを設定します。新しいロールを作る指定でも、後で作られるGatewayロールの指定でもありません。
 2. SSOの場合は、IAMのロール一覧で使用中のSSOロールを開き、パスを含む完全なIAMロールARNをコピーします。`arn:aws:iam::...:role/...`を使い、ログイン後の呼び出し元情報に出る`arn:aws:sts::...:assumed-role/...`は使いません。
@@ -66,9 +66,9 @@ KMS鍵は`commands.sh`の前半で作成されるため、事前に手動作成�
 
 ログイン用の公開クライアントには証明書を登録しません。以前の証明書がEntraに残っていても、KMS鍵を作り直した場合は今回の鍵から生成した証明書を登録する必要があります。ファイル名が同じでも、鍵が違えば互換性はありません。
 
-AgentCoreへ渡す`x5t#S256`はスクリプトが計算するDER証明書のSHA-256をbase64url化した値です。Entra画面に表示されたサムプリントをそのまま転記しません。証明書自体への署名はSHA-256/RSA PKCS#1 v1.5、OAuthのクライアントアサーションへの署名はPS256です。
+AgentCoreに渡す`x5t#S256`はスクリプトが計算するDER証明書のSHA-256をbase64url化した値です。Entra画面に表示されたサムプリントをそのまま転記しません。証明書自体への署名はSHA-256/RSA PKCS#1 v1.5、OAuthのクライアントアサーションへの署名はPS256です。
 
-OBOの`assertion`は利用者トークン、`client_assertion`はアプリ認証用のKMS署名JWTです。OBOターゲットには`requested_token_use=on_behalf_of`も設定します。入口の公開クライアント、中間API、M2Mアプリの3件を取り違えないでください。
+OBOの`assertion`は利用者トークン、`client_assertion`はアプリ認証用のKMS署名JWTです。OBOターゲットには`requested_token_use=on_behalf_of`も設定します。入口の公開クライアント、中間API、M2Mアプリの3つを取り違えないでください。
 
 ## 構築・確認で止まったとき
 
@@ -80,7 +80,7 @@ AlreadyExistsException: An alias with the name ... already exists
 
 同じAWSアカウント・リージョンに、同名のエイリアスが残っています。この段階では、新しい鍵本体だけは作成済みの場合があります。Terraformのstateを削除してやり直さず、既存エイリアスの参照先と管理元を確認してください。
 
-以前の環境が不要なら、その環境を管理するTerraformで鍵とエイリアスを片付けてから再実行します。残す必要がある場合は、今回のエイリアスを別名にします。エイリアスは鍵本体とは別に削除できるため、旧鍵の削除待機期間が終わるまで名前の再利用を待つ必要はありません。本サンプルの鍵本体は7日後の削除予約です。詳細は[AWSのエイリアス削除](https://docs.aws.amazon.com/kms/latest/developerguide/alias-delete.html)と[鍵の削除](https://docs.aws.amazon.com/kms/latest/developerguide/deleting-keys.html)を参照してください。
+以前の環境が不要なら、その環境を管理するTerraformで鍵とエイリアスを削除してから再実行します。残す必要がある場合は、今回のエイリアスを別名にします。エイリアスは鍵本体とは別に削除できるため、旧鍵の削除待機期間が終わるまで名前の再利用を待つ必要はありません。本サンプルの鍵本体は7日後の削除予約です。詳細は[AWSのエイリアス削除](https://docs.aws.amazon.com/kms/latest/developerguide/alias-delete.html)と[鍵の削除](https://docs.aws.amazon.com/kms/latest/developerguide/deleting-keys.html)を参照してください。
 
 エイリアスの削除で次のエラーになる場合は、IAM管理者権限だけでなく、参照先のキーポリシーも確認します。
 
@@ -96,9 +96,9 @@ AccessDeniedException: ... no resource-based policy allows the kms:DeleteAlias a
 BrowserInteractionTimeoutError
 ```
 
-ブラウザでのログインが5分以内に完了せず、まだGraphの呼び出しへ進んでいない状態です。開いたプライベートウィンドウで、Entraに用意した検証ユーザーのサインイン名とパスワードを入力し、必要なMFAや同意まで完了してください。Client IDやアプリ名でログインするのではありません。
+ブラウザでのログインが5分以内に完了せず、まだGraphの呼び出しに進んでいない状態です。開いたプライベートウィンドウで、Entraに用意した検証ユーザーのサインイン名とパスワードを入力し、必要なMFAや同意まで完了してください。Client IDやアプリ名でログインするのではありません。
 
-構築が完了していれば、`commands.sh`にある`client.py --report`の検証コマンドだけを再実行できます。Terraformの適用や証明書登録をやり直す必要はありません。別ユーザーへ切り替える場合は、既存のプライベートウィンドウをすべて閉じてください。
+構築が完了していれば、`commands.sh`にある`client.py --report`の検証コマンドだけを再実行できます。Terraformの適用や証明書登録をやり直す必要はありません。別ユーザーに切り替える場合は、既存のプライベートウィンドウをすべて閉じてください。
 
 ### Aだけの検証とA→B→Aの検証を区別する
 

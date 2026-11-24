@@ -18,7 +18,7 @@ flowchart LR
     H <--> A[Memory: 会話履歴]
 ```
 
-Harnessへの依頼と、画像読み取りは別の推論リクエストです。クライアントがPNGと補助スクリプトを実行環境へ置き、エージェントがshellから`read_receipt.py`を実行します。このスクリプトがBedrock Converseへ画像を送り、文字の転記を返します。転記結果を分類し、用途や重複を確認するのがSkillを使うエージェントです。
+Harnessへの依頼と、画像読み取りは別の推論リクエストです。クライアントがPNGと補助スクリプトを実行環境に置き、エージェントがshellから`read_receipt.py`を実行します。このスクリプトがBedrock Converseに画像を送り、文字の転記を返します。転記結果を分類し、用途や重複を確認するのがSkillを使うエージェントです。
 
 ## 構成ファイル
 
@@ -33,7 +33,7 @@ Harnessへの依頼と、画像読み取りは別の推論リクエストです�
 | `scripts/verify.py` | 初回・回答後の明細と集計の検算 |
 | `data/receipts/` | 同梱の架空PNG画像5枚 |
 | `data/expected.json` | ローカル検算専用の期待値 |
-| `commands.sh` | 配置から確認回答・停止・削除までのコマンド |
+| `commands.sh` | デプロイから確認回答・停止・削除までのコマンド |
 
 Terraformの管理対象はHarness・Memory・実行ロール・IAMポリシー・S3バケット・公開アクセスブロック・Markdownオブジェクト3件の計9リソースです。S3にはSkillのMarkdownだけを置き、実行ロールの読み取り権限をそのプレフィックスに限定します。
 
@@ -59,13 +59,13 @@ Terraformの管理対象はHarness・Memory・実行ロール・IAMポリシー�
 
 Python 3.14、uv、Terraform 1.11以上2.0未満、AWS CLIを使います。Pythonの指定はローカル用で、Harnessの実行環境とは別です。モデルは画像入力に対応した`jp.anthropic.claude-sonnet-4-6`、AWSプロファイルは`develop`、リージョンは`ap-northeast-1`を既定値としています。設定は`terraform/main.tf`の変数に集約し、`terraform/terraform.tfvars`でも変更できます。モデルを変更する場合はConverseの画像入力への対応も確認してください。
 
-配置権限に加え、クライアントには`bedrock-agentcore:GetHarness`・`InvokeHarness`・`InvokeAgentRuntimeCommand`・`StopRuntimeSession`の権限が必要です。Bedrockモデルの利用条件とアクセス権限も確認してください。
+デプロイ用の権限に加え、クライアントには`bedrock-agentcore:GetHarness`・`InvokeHarness`・`InvokeAgentRuntimeCommand`・`StopRuntimeSession`の権限が必要です。Bedrockモデルの利用条件とアクセス権限も確認してください。
 
-コマンドは[commands.sh](commands.sh)にまとめています。WindowsではPowerShell、macOSではターミナルで、サンプル直下から区間ごとに実行します。MCP登録やコーディングエージェントの起動は不要です。
+コマンドは[commands.sh](commands.sh)にまとめています。WindowsではPowerShell、macOSではターミナルで、サンプル直下からセクションごとに実行します。MCP登録やコーディングエージェントの起動は不要です。
 
 `start`の既定の依頼は「この出張分の領収書をまとめて、経費明細CSVと確認事項を作ってください。」です。質問と暫定成果物を確認して初回の検算を行い、同じセッションに確認回答を送ります。`--session latest`は最後に開始したセッションを選び、UUIDを表示します。過去のセッションを指定するときはUUIDに置き換えます。
 
-検算は同梱5枚と手順に記した回答を前提とします。別の画像や別の回答を使った場合は期待値も見直してください。`data/expected.json`はAWSへ送信せず、画像と読み取りスクリプトだけを転送します。
+検算は同梱の5枚と手順に記した回答を前提とします。別の画像や別の回答を使った場合は期待値も見直してください。`data/expected.json`はAWSに送信せず、画像と読み取りスクリプトだけを転送します。
 
 ## 結果の確認
 
@@ -80,13 +80,13 @@ Python 3.14、uv、Terraform 1.11以上2.0未満、AWS CLIを使います。Pyth
 
 同じ実行ディレクトリの`events.jsonl`・`answer.txt`・`execution.json`に途中経過と応答を記録します。Skillや参考資料の利用は、回答文の自己申告だけでなく、実際の読み取りのツール呼び出しで確認してください。
 
-`scripts/verify.py`は領収書番号・日付・発行者・金額・分類・状態・合計を照合し、通過すると`verification.json`へ保存します。生成されたコードはローカルで実行しません。検算が失敗した場合は`start`を繰り返さず、該当画像、転記、明細、確認回答を照合します。画像読み取りには誤読があり得ます。
+`scripts/verify.py`は領収書番号・日付・発行者・金額・分類・状態・合計を照合し、通過すると`verification.json`に保存します。生成されたコードはローカルで実行しません。検算が失敗した場合は`start`を繰り返さず、該当画像、転記、明細、確認回答を照合します。画像読み取りには誤読があり得ます。
 
 ## 実装上のポイント
 
-Skillはセッションの初回呼び出しで取得され、同一セッション内で再利用されます。Skillを変更して配置し直した場合は、新しいセッションで確認します。[AWSのSkills仕様](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/harness-skills.html)
+Skillはセッションの初回呼び出しで取得され、同一セッション内で再利用されます。Skillを変更して再デプロイした場合は、新しいセッションで確認します（詳細は[AWSのSkills仕様](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/harness-skills.html)を参照）。
 
-画像は20,000バイトずつ分割して転送し、ハッシュで転送結果を照合します。画像読み取りではモデルID・画像ハッシュ・指示の版をキーにセッション内へ転記結果をキャッシュします。同一バイトの画像を再度推論する揺れを減らしますが、別撮影の画像は同一扱いせず、誤読した結果もキャッシュされる点には注意が必要です。
+画像は20,000バイトずつ分割して転送し、ハッシュで転送結果を照合します。画像読み取りではモデルID・画像ハッシュ・指示のバージョンをキーにセッション内に転記結果をキャッシュします。同一バイトの画像を再度推論する揺れを減らしますが、別撮影の画像は同一扱いせず、誤読した結果もキャッシュされる点には注意が必要です。
 
 画像読み取り用モデルとリージョンはTerraformから環境変数で渡します。画像読み取りにもモデル料金がかかり、その使用量はHarnessの実行ループのトークン上限とは別に扱います。
 
@@ -94,6 +94,6 @@ Skillはセッションの初回呼び出しで取得され、同一セッショ
 
 追加回答は同じセッションが有効な間に送ります。アイドル15分・最大1時間の実行環境と、Memoryの会話保持7日は別です。一時作業ファイルはMemoryから復元されません。異常終了時は自動再試行せず、成果物だけ回収する場合は`fetch`を使います。
 
-## 片付け
+## 後片付け
 
 使用したセッションを停止してから、`commands.sh`末尾のTerraform削除手順を実行します。Skill用S3バケット内のオブジェクトも削除されるため、ほかのデータを入れないでください。自動作成されたRuntime専用CloudWatchログが残る場合は、`session.json`のRuntime ARNと照合して不要なロググループを削除します。ローカルの実行結果は残ります。

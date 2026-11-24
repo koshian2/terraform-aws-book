@@ -19,15 +19,15 @@ Application Inference Profileは作成しません。モデルはAWS提供の`jp
 
 どちらも入力と出力を検査し、検出時は固定のブロックメッセージを返します。この例ではマスク・PII検出・プロンプト攻撃検出は設定しません。単語フィルターは登録語の検出であり、社内情報全般の流出を防ぐものではありません。
 
-日本語の禁止トピックには**Standard tier**を使います。そのためAWS提供の`apac.guardrail.v1:0`という**Guardrail用プロファイル**を指定します。これはApplication Inference Profileとは別の仕組みで、検査がAPAC内の他リージョンへ振り分けられる場合があります。モデルの日本国内向け推論プロファイルとは処理先が異なります。
+日本語の禁止トピックには**Standard tier**を使います。そのためAWS提供の`apac.guardrail.v1:0`という**Guardrail用プロファイル**を指定します。これはApplication Inference Profileとは別の仕組みで、検査がAPAC内の他リージョンに振り分けられる場合があります。モデルの日本国内向け推論プロファイルとは処理先が異なります。
 
-本サンプルは`DRAFT`を使用し、公開バージョンは作成しません。Guardrailの設定変更は次回の呼び出しから使用されます。設定を固定したい本番用途では、公開バージョンとそれを指定するIAM条件を利用します。
+本サンプルは`DRAFT`を使用し、公開バージョンは作成しません。Guardrailの設定変更は次回の呼び出しから反映されます。設定を固定したい本番用途では、公開バージョンとそれを指定するIAM条件を利用します。
 
-## 配置と実行
+## デプロイと実行
 
-コマンドは[commands.sh](commands.sh)にまとめています。WindowsはPowerShell、macOSはシェルで、サンプル直下から区間ごとに実行してください。必要なのはuv、Terraform、AWS CLIとログイン済みの`develop`プロファイルです。SSOログインは必要時のみ実行します。
+コマンドは[commands.sh](commands.sh)にまとめています。WindowsはPowerShell、macOSはシェルで、サンプル直下からセクションごとに実行してください。必要なのはuv、Terraform、AWS CLIとログイン済みの`develop`プロファイルです。SSOログインは必要時のみ実行します。
 
-配置するのはGuardrail、Lambda、専用実行ロールとポリシー、7日保持のCloudWatchログです。API GatewayやWebサーバーは使わず、Lambda Invoke APIで同期呼び出しします。配置者にはこれらを管理する権限、Lambdaへの`iam:PassRole`、モデルの推論プロファイル参照権限、Guardrail用プロファイルへの管理権限が必要です。
+デプロイするのはGuardrail、Lambda、専用実行ロールとポリシー、7日保持のCloudWatchログです。API GatewayやWebサーバーは使わず、Lambda Invoke APIで同期呼び出しします。デプロイ実行者にはこれらを管理する権限、Lambdaへの`iam:PassRole`、モデルの推論プロファイル参照権限、Guardrail用プロファイルへの管理権限が必要です。
 
 ローカル実行者には対象GuardrailとAPAC宛先のGuardrail用プロファイルへの`bedrock:ApplyGuardrail`、対象Lambdaへの`lambda:InvokeFunction`が必要です。Terraformの`local_client_policy`出力で対象ARN付きの権限例を確認できます。既存の`develop`の権限は変更しません。Lambda経由の例を使うには、このアカウントで指定のClaudeモデルを利用できる必要があります。
 
@@ -38,7 +38,7 @@ Application Inference Profileは作成しません。モデルはAWS提供の`jp
 | local / normal | `passed` | 家電選びの質問が通る。回答は生成しない |
 | local / topic | `blocked` | `topic:InvestmentAdvice`が検出される |
 | local / word | `blocked` | `word:PROJECT-KOHARU`が検出される |
-| local / OUTPUT | `blocked` | 手作りの回答文も単独で検査できる |
+| local / OUTPUT | `blocked` | 独自に用意した回答文も単独で検査できる |
 | lambda / normal | `answered` | Guardrail付きのモデル呼び出しが成功 |
 | lambda / topic・word | `blocked` | Converseの`guardrail_intervened`と該当フィルターを確認 |
 | lambda / normal / unguarded | `access_denied` | 同じ通常文でもGuardrailを省略するとIAMが拒否 |
@@ -49,11 +49,11 @@ Application Inference Profileは作成しません。モデルはAWS提供の`jp
 
 ## IAMで何を強制しているか
 
-ローカルの認証情報は、単独検査またはLambdaを呼ぶために使います。Lambda内のBedrock呼び出しは**Lambda実行ロールの一時認証情報**で行われます。ローカルの認証情報をLambdaへ渡す構成ではありません。
+ローカルの認証情報は、単独検査またはLambdaを呼び出すために使います。Lambda内のBedrock呼び出しは**Lambda実行ロールの一時認証情報**で行われます。ローカルの認証情報をLambdaに渡す構成ではありません。
 
-実行ロールは対象モデルへの推論をAllowしたうえで、`bedrock:GuardrailIdentifier`が**指定Guardrailのバージョン番号なしのARN**と一致しない場合、`InvokeModel`と`InvokeModelWithResponseStream`を明示的にDenyします。Converseも`bedrock:InvokeModel`で認可されるため対象です。未指定の場合も拒否され、Guardrailを別のものや公開バージョンへ変えても拒否されます。API側では`guardrailVersion="DRAFT"`を指定し、IAM条件側ではARNに`:DRAFT`を付けません。
+実行ロールは対象モデルへの推論をAllowしたうえで、`bedrock:GuardrailIdentifier`が**指定Guardrailのバージョン番号なしのARN**と一致しない場合、`InvokeModel`と`InvokeModelWithResponseStream`を明示的にDenyします。Converseも`bedrock:InvokeModel`で認可されるため対象です。未指定の場合も拒否され、Guardrailを別のものや公開バージョンに変えても拒否されます。API側では`guardrailVersion="DRAFT"`を指定し、IAM条件側ではARNに`:DRAFT`を付けません。
 
-`unguarded`は検証用の切り替えです。Lambdaのコードが拒否を模擬するのではなく、`guardrailConfig`を省略して実際にConverseを呼びます。同じ質問の`guarded`が成功することを先に確認し、その後に`unguarded`のエラーメッセージで明示的Denyを確認してください。単なる`AccessDeniedException`だけでは、モデルアクセス不足など他の権限エラーと区別できません。
+`unguarded`は検証用の切り替えです。Lambdaのコードが拒否を模擬するのではなく、`guardrailConfig`を省略して実際にConverseを呼び出します。同じ質問の`guarded`が成功することを先に確認し、その後に`unguarded`のエラーメッセージで明示的Denyを確認してください。単なる`AccessDeniedException`だけでは、モデルアクセス不足など他の権限エラーと区別できません。
 
 Lambda InvokeのHTTP成功は、Bedrockでの推論成功を意味しません。クライアントはLambdaの`FunctionError`と返却した`status`を確認します。認可以外のBedrockエラーは通常のLambda実行エラーとして扱い、Guardrailのブロックに置き換えません。
 
@@ -68,11 +68,11 @@ Lambda InvokeのHTTP成功は、Bedrockでの推論成功を意味しません�
 | `terraform/providers.tf`・`outputs.tf` | プロバイダー・モデル設定・クライアント設定 |
 | `app/lambda_function.py` | Guardrail付き／なしのConverse呼び出し |
 | `scripts/client.py` | ApplyGuardrail単独検査、Lambda呼び出し、結果確認 |
-| `commands.sh` | 準備・比較・片付けのコマンド |
+| `commands.sh` | 準備・比較・後片付けのコマンド |
 
-## 片付け
+## 後片付け
 
-利用後は`commands.sh`末尾の片付け区間でTerraform管理のリソースを削除します。Lambdaのログも削除対象です。ローカルの実行記録は残り、Git管理からは除外しています。
+利用後は`commands.sh`末尾の削除セクションでTerraform管理のリソースを削除します。Lambdaのログも削除対象です。ローカルの実行記録は残り、Git管理からは除外しています。
 
 ## 公式資料
 

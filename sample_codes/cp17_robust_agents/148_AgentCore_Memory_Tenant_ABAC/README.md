@@ -40,11 +40,11 @@ Python 3.14、uv、Terraform 1.11以上2.0未満、AWS CLIを用意します。A
 | ルート名前空間・namespacePath・類似テナント名による参照 | AccessDenied |
 | 記憶IDを直接指定するGetMemoryRecord | 操作を許可していないためAccessDenied |
 | タグなし・未知のテナント・余分なタグでのAssumeRole | AccessDenied |
-| テナント用の一時認証情報から別テナントへ再AssumeRole | AccessDenied |
+| テナント用の一時認証情報から別テナントへの再AssumeRole | AccessDenied |
 
 クライアントは25項目を確認し、全項目を通過すると結果の`status`が`passed`になります。拒否ケースは実際のAWS APIのAccessDeniedを確認し、空の検索結果を拒否成功とは扱いません。長期記憶は両社のデータが生成されたことを確認してから越境参照を試します。
 
-結果と取得した会話・記憶は`results/latest.json`へ保存します。長期記憶の抽出は非同期です。600秒以内に揃わなければ`incomplete_observation`と終了コード2になり、長期記憶の検証は未完了です。後から`show`で生成状況を確認できます。`demo`を再実行すると別のactorIdとsessionIdを作成します。
+結果と取得した会話・記憶は`results/latest.json`に保存します。長期記憶の抽出は非同期です。600秒以内に揃わなければ、結果が`incomplete_observation`、終了コードが2となり、長期記憶の検証は未完了となります。後から`show`で生成状況を確認できます。`demo`を再実行すると別のactorIdとsessionIdを作成します。
 
 ## 分離の範囲
 
@@ -52,7 +52,7 @@ Python 3.14、uv、Terraform 1.11以上2.0未満、AWS CLIを用意します。A
 
 ローカルPythonは信頼する管理者として両社の認証情報を取得します。実際のアプリでは、認証済みの所属情報から信頼するバックエンドがTenantIdを決定し、利用者やLLMにタグを選ばせないことが前提です。Cognitoによる認証と所属情報の伝播は、このサンプルの検証範囲には含みません。
 
-GetMemoryRecordなど名前空間の条件を使わない操作は許可していません。Memoryへの広いアクセス権を別途付与すると境界が変わるため、本サンプルでは示した操作に権限を限定します。
+GetMemoryRecordなど名前空間の条件を使わない操作は許可していません。Memoryへの広いアクセス権を別途付与すると境界が変わるため、本サンプルでは記載した操作に権限を限定します。
 
 ## ファイル
 
@@ -61,7 +61,7 @@ GetMemoryRecordなど名前空間の条件を使わない操作は許可して�
 | `terraform/` | Memory・Semantic戦略・共有IAMロールとポリシー |
 | `scripts/client.py` | 保存・取得と正常／越境アクセスの確認 |
 | `data/conversations.json` | 架空の会話データ |
-| `commands.sh` | 実行と片付けの手順 |
+| `commands.sh` | 実行と後片付けの手順 |
 
 ## 参考資料
 

@@ -23,7 +23,7 @@
 
 1. 中間APIの「証明書とシークレット」で短い有効期間のClient Secretを作成します。表示される「値」を使用し、シークレットIDとは区別します。
 2. AWS Secrets Managerでこのサンプル専用のシークレットを作成します。その他のシークレットのタイプで、JSONキー`clientSecret`に値を保存します。リージョンはTerraformと同じにします。
-3. シークレット名を`terraform/terraform.tfvars`の`secret_name`へ設定します。秘密値は設定ファイルへ書きません。
+3. シークレット名を`terraform/terraform.tfvars`の`secret_name`に設定します。秘密値は設定ファイルに書きません。
 4. Entraの期限とSecrets Manager側の値の両方を管理します。更新後は新しいトークンが取得できることを確認します。
 
-このシークレットは手動管理のため、Terraform destroy後にSecrets ManagerとEntraの両方で片付けます。
+このシークレットは手動管理のため、Terraform destroy後にSecrets ManagerとEntraの両方で削除します。

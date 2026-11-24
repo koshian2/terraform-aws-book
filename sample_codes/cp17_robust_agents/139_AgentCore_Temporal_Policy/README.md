@@ -1,4 +1,4 @@
-# 誰が・どの順序で呼べるかをAgentCore Policyで制御する
+# 誰が・どの順序で呼び出せるかをAgentCore Policyで制御する
 
 問い合わせを取得してからクローズするMCPの例です。GatewayのPolicyで、利用者の権限と過去の操作を確認します。readerは取得だけ、operatorは同じ問い合わせを直近5分以内に取得した場合だけクローズできます。
 
@@ -11,7 +11,7 @@ Python / Codex / Claude Code
   → 許可された呼び出しだけ → IAM SigV4 → Runtime / MCP
 ```
 
-ツールはRuntimeで公開し、各クライアントはGatewayへ直接HTTP接続します。ローカルで待ち受けるポートはCognitoログイン・ログアウトのコールバック用です。
+ツールはRuntimeで公開し、各クライアントはGatewayに直接HTTP接続します。ローカルで待ち受けるポートはCognitoログイン・ログアウトのコールバック用です。
 
 ## ツールとデータ
 
@@ -43,7 +43,7 @@ Python / Codex / Claude Code
 
 Dogwoodの`formerly within 5m`で過去の`get_inquiry::response`イベントを参照し、`eventPrincipal`・`eventResource`・`input.ticket_id`を現在の要求と照合します。取得履歴は5分以内なら再利用でき、単回使用の承認ではありません。
 
-AWS Providerは6.66.0です。Cedarの2つは`aws_bedrockagentcore_policy`、Dogwoodの1つは`Definition.Policy`を渡すためTerraform管理のCloudFormation Stackで配置します。非operator拒否ルールは、履歴によるpermitを作る前の静的検証の指摘に対応するため`IGNORE_ALL_FINDINGS`を使います。実行時の認可は有効です。
+AWS Providerは6.66.0です。Cedarの2つは`aws_bedrockagentcore_policy`、Dogwoodの1つは`Definition.Policy`を渡すため、Terraform管理のCloudFormation Stackでデプロイします。非operator拒否ルールは、履歴によるpermitを作る前の静的検証の指摘に対応するため`IGNORE_ALL_FINDINGS`を使います。実行時の認可は有効です。
 
 ## Policyセッションとツール一覧
 
@@ -51,23 +51,23 @@ Policyセッションは`x-amzn-bedrock-agentcore-policy-session-id`ヘッダー
 
 Pythonクライアントは比較ケースごとに新しいUUIDを生成し、取得とクローズを同じ履歴で評価するときだけ共有します。Codex・Claude Codeでは設定生成時にUUIDを埋め込み、設定の再生成や`session.py`で更新するまで使います。チャットを新しくするだけではPolicyセッションは変わりません。履歴の有効期間を過ぎた場合やPolicy更新後は、新しいセッションで取得から試します。
 
-Policyはツール一覧にも適用されます。readerは取得の1ツール、operatorは取得とクローズの2ツールが表示される想定です。一覧に出ていても、取得前のクローズは実行時に拒否されます。Pythonクライアントは非表示のツールも直接呼び、Gatewayが拒否することを確認します。
+Policyはツール一覧にも適用されます。readerは取得の1ツール、operatorは取得とクローズの2ツールが表示される想定です。一覧に出ていても、取得前のクローズは実行時に拒否されます。Pythonクライアントは非表示のツールも直接呼び出し、Gatewayが拒否することを確認します。
 
 ## 準備と実行
 
-Python 3.14、uv、Terraform 1.12以上2.0未満、AWS CLIを使います。FastMCPは4.1.1です。プロファイルは`develop`、リージョンは東京が既定です。変更は`terraform/terraform.tfvars`で行います。複数配置する場合は`name`も変えます。
+Python 3.14、uv、Terraform 1.12以上2.0未満、AWS CLIを使います。FastMCPは4.1.1です。プロファイルは`develop`、リージョンは東京が既定です。変更は`terraform/terraform.tfvars`で行います。複数デプロイする場合は`name`も変えます。
 
-実行コマンドは[commands.sh](commands.sh)にまとめています。サンプル直下で区間ごとに実行します。ZIPのビルド後にTerraformで配置し、readerとoperatorを作成します。ユーザー名を変更する場合は`reader_username`・`operator_username`と作成するユーザー名を揃えてください。
+実行コマンドは[commands.sh](commands.sh)にまとめています。サンプル直下でセクションごとに実行します。ZIPのビルド後にTerraformでデプロイし、readerとoperatorを作成します。ユーザー名を変更する場合は`reader_username`・`operator_username`と作成するユーザー名を揃えてください。
 
-配置にはS3・IAM・Cognito・AgentCore・CloudFormationの管理権限と`iam:PassRole`が必要です。片付けでは自動生成されたログとWorkload Identityの削除権限も使用します。
+デプロイにはS3・IAM・Cognito・AgentCore・CloudFormationの管理権限と`iam:PassRole`が必要です。後片付けでは自動生成されたログとWorkload Identityの削除権限も使用します。
 
 ターゲット登録前に、Gatewayの権限とRuntimeのリソースポリシー設定後60秒待機します。権限の反映完了を保証する待ち時間ではないため、`Authorization error when sending message`が出た場合は、少し時間を置いてから再実行してください。
 
-Pythonクライアントは最初にCognitoからサインアウトして、指定したユーザーでログインします。ブラウザとPythonは同じPCで使い、8765番・8768番ポートを空けてください。1回のログインで表の比較を実施し、応答・期待値との一致・PolicyセッションIDを`results/`へ記録します。トークンはメモリ内だけで保持します。ログインしたユーザーが指定と違う場合は検証を開始しません。
+Pythonクライアントは最初にCognitoからサインアウトして、指定したユーザーでログインします。ブラウザとPythonは同じPCで使い、8765番・8768番ポートを空けてください。1回のログインで表の比較を実施し、応答・期待値との一致・PolicyセッションIDを`results/`に記録します。トークンはメモリ内だけで保持します。ログインしたユーザーが指定と違う場合は検証を開始しません。
 
 ## コーディングエージェントで試す
 
-Codexは`configure_codex.py`でコールバックをCognitoへ登録し、ログイン画面への到達を確認してから`codex/.codex/config.toml`を生成します。`codex/`をプロジェクトとして開きます。Claude Codeは`configure_claude.py`で`claude-code/.mcp.json`を生成し、そのフォルダで起動して`/mcp`から認証します。どちらもMCP名は`agentcore-temporal`です。
+Codexは`configure_codex.py`でコールバックをCognitoに登録し、ログイン画面への到達を確認してから`codex/.codex/config.toml`を生成します。`codex/`をプロジェクトとして開きます。Claude Codeは`configure_claude.py`で`claude-code/.mcp.json`を生成し、そのフォルダで起動して`/mcp`から認証します。どちらもMCP名は`agentcore-temporal`です。
 
 readerとoperatorで次を比較します。
 
@@ -87,12 +87,12 @@ operatorで新しいPolicyセッションに切り替えてから、次を試し
 | --- | --- |
 | `app/` | Runtime上のMCPツールと固定データ |
 | `terraform/` | Runtime・Gateway・Cognito・Policy・IAM |
-| `scripts/` | ビルド、ユーザー作成、接続設定、比較実行、ユーザー切り替え、片付け |
+| `scripts/` | ビルド、ユーザー作成、接続設定、比較実行、ユーザー切り替え、後片付け |
 | `results/` | 実行時の比較記録（Git管理対象外） |
 
-## 片付け
+## 後片付け
 
-片付けのコマンドはcommands.sh末尾です。対象情報を保存してTerraform管理リソースを削除した後、RuntimeのログとRuntime・GatewayのWorkload Identityを確認・削除します。Cognitoユーザーもプールとともに削除されます。
+後片付けのコマンドはcommands.sh末尾にあります。対象情報を保存してTerraform管理リソースを削除した後、RuntimeのログとRuntime・GatewayのWorkload Identityを確認・削除します。Cognitoユーザーもプールとともに削除されます。
 
 - [Temporal Policy](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-temporal.html)
 - [Dogwoodのイベント・条件記述](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-temporal-authoring.html)

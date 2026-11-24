@@ -8,11 +8,11 @@ Python / Codex / Claude Code
   → IAM SigV4 → AgentCore Runtime / MCP
 ```
 
-Runtimeが公開するツールは`add(a, b)`の1個です。Gatewayでの名前は`calculator-runtime___add`となります。入力は−1,000,000〜1,000,000の整数で、結果は`a`・`b`・`sum`です。
+Runtimeが公開するツールは`add(a, b)`の1つです。Gatewayでの名前は`calculator-runtime___add`となります。入力は−1,000,000〜1,000,000の整数で、結果は`a`・`b`・`sum`です。
 
 ## 制限の範囲
 
-レート制限の集計キーは`toolName`だけです。ユーザーやクライアントごとの枠ではなく、同じツールを呼ぶ全利用者で枠を共有します。初期化とツール一覧取得は、このツール呼び出し数の制限対象に含めません。Runtimeへの直接呼び出しは、GatewayのIAMロール以外からは拒否します。
+レート制限の集計キーは`toolName`だけです。ユーザーやクライアントごとの枠ではなく、同じツールを呼び出す全利用者で枠を共有します。初期化とツール一覧取得は、このツール呼び出し数の制限対象に含めません。Runtimeへの直接呼び出しは、GatewayのIAMロール以外からは拒否します。
 
 `terraform/rate_limit.tf`のCloudFormation Stackで`AWS::BedrockAgentCore::GatewayRateLimit`を管理します。固定しているAWS Provider 6.66.0の専用リソースがないため、この部分だけCloudFormationを使います。削除もTerraformから行います。
 
@@ -24,17 +24,17 @@ Runtimeが公開するツールは`add(a, b)`の1個です。Gatewayでの名前
 | 種類 | `requests` |
 | レート | 毎分2回（`requests_per_minute`で1〜10に変更可能） |
 
-**必ず3回目で拒否される、毎分00秒に枠が戻る、とは考えません。** AWSの説明では、レート制限は結果整合であり、作成直後やしばらく使っていない制限は設定以上の要求を許可する場合があります。毎分数回の低いレートでは精度のばらつきも大きくなります。この例では、成功回数を固定せず、制限の発生と回復を観察します。[適用精度と制限時の挙動](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-rate-limits-enforcement.html)
+**必ず3回目で拒否される、毎分00秒に枠が戻る、とは考えません。** AWSの説明では、レート制限は結果整合性（eventual consistency）に基づいており、作成直後やしばらく使っていない制限は設定以上の要求を許可する場合があります。毎分数回の低いレートでは精度のばらつきも大きくなります。この例では、成功回数を固定せず、制限の発生と回復を観察します（詳細は[適用精度と制限時の挙動](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-rate-limits-enforcement.html)を参照）。
 
 また、評価サービスがタイムアウトした場合はfail-openとなります。レート制限は利用量の調整・バックエンド保護に使い、厳密な課金上限や認可の代わりにはしません。
 
 ## 準備と実行
 
-Python 3.14、uv、Terraform 1.12以上2.0未満、AWS CLIを使用します。FastMCPは4.1.1、AWSプロファイルは`develop`、リージョンは東京が既定です。設定変更は`terraform/terraform.tfvars`で行い、複数配置するときは`name`も変えます。
+Python 3.14、uv、Terraform 1.12以上2.0未満、AWS CLIを使用します。FastMCPは4.1.1、AWSプロファイルは`develop`、リージョンは東京が既定です。設定変更は`terraform/terraform.tfvars`で行い、複数デプロイするときは`name`も変えます。
 
-実行コマンドは[commands.sh](commands.sh)にまとめています。サンプル直下で区間ごとに実行し、ZIP作成後にTerraformで配置します。ターゲット登録前には、権限反映のため60秒待機します。反映完了の保証ではないため、初回に認可エラーが出た場合は少し時間を置いて再実行してください。
+実行コマンドは[commands.sh](commands.sh)にまとめています。サンプル直下でセクションごとに実行し、ZIP作成後にTerraformでデプロイします。ターゲット登録前には、権限反映のため60秒待機します。反映完了の保証ではないため、初回に認可エラーが出た場合は少し時間を置いて再実行してください。
 
-配置にはS3・IAM・Cognito・AgentCore・CloudFormationの管理権限と`iam:PassRole`が必要です。片付けでは自動生成ログとWorkload Identityの削除権限も使います。
+デプロイにはS3・IAM・Cognito・AgentCore・CloudFormationの管理権限と`iam:PassRole`が必要です。後片付けでは自動生成ログとWorkload Identityの削除権限も使います。
 
 ユーザー`reader`を作成し、ブラウザでログインします。パスワードは対話入力で設定し、Terraform stateには保存しません。Pythonのログインでは同じPCの8765番ポートを使います。トークンはメモリ内だけで保持します。
 
@@ -59,16 +59,16 @@ Codexは設定生成後に`codex/`をプロジェクトとして開きます。C
 
 モデルの判断時間やクライアント内部の再試行で、エラーが表に出ない場合があります。正確な応答の記録と回復確認はPythonで行います。
 
-## ファイル構成と片付け
+## ファイル構成と後片付け
 
 | フォルダ | 役割 |
 | --- | --- |
 | `app/` | Runtimeで公開する足し算MCP |
 | `terraform/` | Runtime・Gateway・Cognito・IAM・レート制限 |
-| `scripts/` | ビルド・ログイン・接続設定・呼び出し・片付け |
+| `scripts/` | ビルド・ログイン・接続設定・呼び出し・後片付け |
 | `results/` | 実行時の記録（Git管理対象外） |
 
-片付けはcommands.sh末尾の手順です。対象を記録してTerraformで削除した後、RuntimeのログとRuntime・GatewayのWorkload Identityも削除します。
+後片付けはcommands.sh末尾の手順です。対象を記録してTerraformで削除した後、RuntimeのログとRuntime・GatewayのWorkload Identityも削除します。
 
 - [Gatewayレート制限](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-rate-limits.html)
 - [CloudFormation GatewayRateLimit](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-bedrockagentcore-gatewayratelimit.html)
