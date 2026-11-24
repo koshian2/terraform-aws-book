@@ -1,0 +1,10 @@
+{
+  "normal": {
+    "estimate": {"repair_days": 3, "status": "provisional", "note": "外観の概算。部品在庫の確定確認が必要です。"},
+    "confirmed": {"repair_days": 3, "status": "confirmed", "note": "部品在庫あり。入庫から引き渡しまで3日間の見込みを確認しました。"}
+  },
+  "delayed": {
+    "estimate": {"repair_days": 3, "status": "provisional", "note": "外観の概算。部品在庫の確定確認が必要です。"},
+    "confirmed": {"repair_days": 10, "status": "confirmed", "note": "詳しく確認した結果、交換部品が取り寄せです。部品待ちを含めて入庫から引き渡しまで10日間に修正します。"}
+  }
+}
