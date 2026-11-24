@@ -4,6 +4,9 @@
 # Terraform lock file
 .terraform.lock.hcl
 
+# uv lock file
+uv.lock
+
 # Terraform and cache directories
 .terraform/
 .cache/

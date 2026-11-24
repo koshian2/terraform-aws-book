@@ -1,0 +1,22 @@
+{
+  "metadataAttributes": {
+    "source_url": {
+      "value": {
+        "type": "STRING",
+        "stringValue": "https://www.mlit.go.jp/policy/shingikai/content/001705261.pdf"
+      }
+    },
+    "document_title": {
+      "value": {
+        "type": "STRING",
+        "stringValue": "移住・二地域居住等の促進に向けた検討の方向性について"
+      }
+    },
+    "meeting_date": {
+      "value": {
+        "type": "STRING",
+        "stringValue": "2023-10-19"
+      }
+    }
+  }
+}

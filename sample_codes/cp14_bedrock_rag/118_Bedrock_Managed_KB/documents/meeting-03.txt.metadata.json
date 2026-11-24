@@ -1,0 +1,22 @@
+{
+  "metadataAttributes": {
+    "meeting_number": {
+      "value": {
+        "type": "NUMBER",
+        "numberValue": 3
+      }
+    },
+    "meeting_date": {
+      "value": {
+        "type": "STRING",
+        "stringValue": "2023-12-12"
+      }
+    },
+    "source_url": {
+      "value": {
+        "type": "STRING",
+        "stringValue": "https://www.mlit.go.jp/policy/shingikai/kokudo03_sg_000267.html"
+      }
+    }
+  }
+}
