@@ -1,0 +1,31 @@
+{
+  "openapi": "3.0.3",
+  "info": {"title": "Graph current user only", "version": "1.0.0"},
+  "servers": [{"url": "https://graph.microsoft.com/v1.0"}],
+  "paths": {
+    "/me": {
+      "get": {
+        "operationId": "get_my_profile",
+        "description": "Read the signed-in user's own profile. No arguments are accepted.",
+        "responses": {
+          "200": {
+            "description": "The signed-in user's profile (Graph default profile fields).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["id"],
+                  "properties": {
+                    "id": {"type": "string"},
+                    "displayName": {"type": "string", "nullable": true},
+                    "userPrincipalName": {"type": "string", "nullable": true}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

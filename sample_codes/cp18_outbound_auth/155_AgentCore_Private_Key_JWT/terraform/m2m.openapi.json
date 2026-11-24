@@ -1,0 +1,48 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Graph organization (app-only)",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://graph.microsoft.com/v1.0"
+    }
+  ],
+  "paths": {
+    "/organization": {
+      "get": {
+        "operationId": "get_organization",
+        "description": "Read the current tenant organization. No caller-selected URL or ID.",
+        "responses": {
+          "200": {
+            "description": "Organization collection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

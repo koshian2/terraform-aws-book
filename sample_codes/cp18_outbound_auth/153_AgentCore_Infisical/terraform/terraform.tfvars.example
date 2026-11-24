@@ -1,0 +1,3 @@
+infisical_host = "https://app.infisical.com"
+infisical_organization_id = "YOUR_ORGANIZATION_ID"
+infisical_manager_identity_id = "YOUR_TERRAFORM_MACHINE_IDENTITY_ID"

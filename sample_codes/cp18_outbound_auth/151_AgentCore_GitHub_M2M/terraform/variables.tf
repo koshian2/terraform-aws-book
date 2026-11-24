@@ -1,0 +1,28 @@
+variable "aws_profile" {
+  type    = string
+  default = "develop"
+}
+
+variable "codex_oauth_callback_url" {
+  description = "Codex-specific callback URL, including the ID printed by codex mcp login. Configure after the first deployment."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.codex_oauth_callback_url == null ? true : can(regex("^http://(localhost|127[.]0[.]0[.]1):8766/callback/[A-Za-z0-9_-]+$", var.codex_oauth_callback_url))
+    error_message = "Use http://localhost:8766/callback/<Codex callback ID>."
+  }
+}
+
+variable "aws_region" {
+  type    = string
+  default = "ap-northeast-1"
+}
+
+variable "name" {
+  type    = string
+  default = "github_mcp_m2m"
+  validation {
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9_]{0,39}$", var.name))
+    error_message = "name must start with a letter and contain up to 40 letters, digits, or underscores."
+  }
+}

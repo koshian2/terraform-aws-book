@@ -1,0 +1,7 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+cache/
+payloads/response_*.json
+__pycache__/

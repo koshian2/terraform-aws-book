@@ -1,0 +1,6 @@
+[profile develop]
+sso_start_url = https://example.awsapps.com/start
+sso_region = ap-northeast-1
+sso_account_id = <YOUR_AWS_ACCOUNT_ID>
+sso_role_name = ExampleRole
+region = ap-northeast-1

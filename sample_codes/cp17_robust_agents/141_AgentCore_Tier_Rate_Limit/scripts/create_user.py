@@ -1,0 +1,36 @@
+"""Create a demo user without putting their password into Terraform state."""
+import argparse
+import getpass
+
+import boto3
+
+from common import settings
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--username", required=True)
+    parser.add_argument("--tenant", required=True, choices=["tenant-a", "tenant-b", "tenant-c"])
+    args = parser.parse_args()
+    config = settings()
+    if config['demo_users'].get(args.username) != args.tenant:
+        raise SystemExit('ユーザー名とテナントをTerraformのdemo_usersの対応に合わせてください。')
+    password = getpass.getpass("New password (12+ chars, upper/lowercase, digit, symbol): ")
+    if password != getpass.getpass("Confirm password: "):
+        raise SystemExit("Passwords do not match")
+    client = boto3.Session(profile_name=config["aws_profile"], region_name=config["aws_region"]).client("cognito-idp")
+    try:
+        client.admin_create_user(UserPoolId=config["user_pool_id"], Username=args.username, MessageAction="SUPPRESS",
+                                  UserAttributes=[{"Name": "custom:tenant_id", "Value": args.tenant}])
+    except client.exceptions.UsernameExistsException:
+        raise SystemExit("User already exists. Use the existing password or reset it in the Cognito console.")
+    try:
+        client.admin_set_user_password(UserPoolId=config["user_pool_id"], Username=args.username, Password=password, Permanent=True)
+    except Exception:
+        print("User created but password setup failed. Reset the password in the Cognito console.")
+        raise
+    print(f"Created user: {args.username}")
+
+
+if __name__ == "__main__":
+    main()

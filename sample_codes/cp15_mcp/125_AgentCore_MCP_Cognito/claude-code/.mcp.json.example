@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "agentcore-cognito": {
+      "type": "http",
+      "url": "<Terraform output: mcp_url>",
+      "oauth": {
+        "clientId": "<Cognito app client ID>",
+        "callbackPort": 8767,
+        "scopes": "openid hello-mcp/invoke",
+        "authServerMetadataUrl": "https://cognito-idp.ap-northeast-1.amazonaws.com/<user-pool-id>/.well-known/openid-configuration"
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "standard": {"available_days_max": 7, "daily_yen": 6000, "note": "普通車は連続7日まで空きあり。それを超える同一車両の延長はできません。"},
+  "compact": {"available_days_max": 14, "daily_yen": 4500, "note": "小型車は連続14日まで空きあり。小型車への変更は顧客に確認してください。"}
+}

@@ -1,0 +1,4 @@
+*
+!pyproject.toml
+!scripts/
+!scripts/verify.py

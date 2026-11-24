@@ -1,0 +1,18 @@
+{
+    "metadataAttributes":  {
+                               "document_id":  "a-support",
+                               "tenant_id":  "tenant-a"
+                           },
+    "accessControlList":  [
+                              {
+                                  "Access":  "ALLOW",
+                                  "Name":  "alice@tenant-a.example",
+                                  "Type":  "USER"
+                              },
+                              {
+                                  "Access":  "ALLOW",
+                                  "Name":  "ann@tenant-a.example",
+                                  "Type":  "USER"
+                              }
+                          ]
+}
