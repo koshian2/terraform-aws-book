@@ -1,0 +1,32 @@
+name: postgres-tenant-isolation
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: tenant_demo
+      POSTGRES_USER: demo_admin
+      POSTGRES_PASSWORD: local-admin-demo-only
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    volumes:
+      - db-data:/var/lib/postgresql
+      - ./sql/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U demo_admin -d tenant_demo"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    # DBポートはホストへ公開せず、Compose内からのみ接続する。
+  verify:
+    profiles: ["verify"]
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGDATABASE: tenant_demo
+      PGCONNECT_TIMEOUT: "10"
+    volumes:
+      - ./results:/demo/results
+volumes:
+  db-data:

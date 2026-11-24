@@ -1,0 +1,13 @@
+{
+    "metadataAttributes":  {
+                               "document_id":  "a-contract",
+                               "tenant_id":  "tenant-a"
+                           },
+    "accessControlList":  [
+                              {
+                                  "Access":  "ALLOW",
+                                  "Name":  "alice@tenant-a.example",
+                                  "Type":  "USER"
+                              }
+                          ]
+}
