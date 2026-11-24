@@ -1,0 +1,11 @@
+# scripts/configure_codex.pyで、デプロイした環境のconfig.tomlを生成します。
+[mcp_servers.agentcore-gateway]
+url = "<Terraformのmcp_url>"
+scopes = ["openid", "hello-mcp/invoke"]
+startup_timeout_sec = 120
+tool_timeout_sec = 180
+
+[mcp_servers.agentcore-gateway.oauth]
+client_id = "<Cognito App Client ID>"
+callback_port = 8766
+callback_url = "http://localhost:8766/callback"

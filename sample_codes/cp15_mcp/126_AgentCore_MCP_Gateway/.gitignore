@@ -1,0 +1,11 @@
+.venv/
+codex/.codex/config.toml
+claude-code/.mcp.json
+claude-code/.claude/settings.local.json
+__pycache__/
+build/
+.terraform/
+*.tfstate*
+*.tfplan
+*.auto.tfvars
+terraform.tfvars

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "aws-knowledge": {
+      "url": "https://knowledge-mcp.global.api.aws",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Cognitoでログイン</title>
+  <style>
+    body { max-width: 800px; margin: 48px auto; padding: 0 24px; font-family: system-ui,sans-serif; color: #183047; }
+    button { padding: 10px 16px; margin: 4px; cursor: pointer; }
+    pre { background: #f1f5f9; padding: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    p { line-height: 1.8; }
+  </style>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <h1>Cognitoでログイン</h1>
+  <p>Cognitoでログインし、発行されたIDトークンとアクセストークンを比べてみましょう。このページ自体は公開されているJWTの学習用デモです。</p>
+  <button id="login" disabled>ログイン</button>
+  <button id="refresh" disabled>トークンを更新</button>
+  <button id="logout" disabled>ログアウト</button>
+  <p id="status" role="status">設定を読み込んでいます。</p>
+  <h2>トークンの中身</h2>
+  <p>以下はJWTをデコードした学習用表示です。署名や期限などの検証は、付属のPythonデモで確認できます。</p>
+  <pre id="claims">ログイン後に表示します。</pre>
+  <p>トークンはメモリだけに保持します。ページを再読み込みした場合は再度ログインしてください。</p>
+</body>
+</html>
