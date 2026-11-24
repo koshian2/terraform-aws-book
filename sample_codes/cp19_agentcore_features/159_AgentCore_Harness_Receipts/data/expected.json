@@ -1,0 +1,43 @@
+[
+  {
+    "source_file": "01.png",
+    "receipt_id": "R-20260901-101",
+    "date": "2026-09-01",
+    "merchant": "架空トラベル鉄道",
+    "amount_yen": 14720,
+    "category": "旅費交通費"
+  },
+  {
+    "source_file": "02.png",
+    "receipt_id": "H-20260901-202",
+    "date": "2026-09-01",
+    "merchant": "サンプル大阪ホテル",
+    "amount_yen": 12000,
+    "category": "宿泊費"
+  },
+  {
+    "source_file": "03.png",
+    "receipt_id": "S-20260902-303",
+    "date": "2026-09-02",
+    "merchant": "架空文具店",
+    "amount_yen": 1100,
+    "category": "消耗品費"
+  },
+  {
+    "source_file": "04.png",
+    "receipt_id": "F-20260902-404",
+    "date": "2026-09-02",
+    "merchant": "サンプル食堂",
+    "amount_yen": 3600,
+    "category": "会議費"
+  },
+  {
+    "source_file": "05.png",
+    "receipt_id": "R-20260901-101",
+    "date": "2026-09-01",
+    "merchant": "架空トラベル鉄道",
+    "amount_yen": 14720,
+    "category": "旅費交通費",
+    "duplicate_of": "01.png"
+  }
+]

@@ -1,0 +1,15 @@
+[project]
+name = "agentcore-runtime-observability"
+version = "0.1.0"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "mcp==1.30.0",
+    "boto3==1.43.100",
+    "httpx>=0.28,<1",
+    "aws-opentelemetry-distro==0.20.0",
+    "opentelemetry-instrumentation-botocore==0.65b0",
+    "opentelemetry-instrumentation-asgi==0.65b0",
+]
+
+[tool.uv]
+package = false
