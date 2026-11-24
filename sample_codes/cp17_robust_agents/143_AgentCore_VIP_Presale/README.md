@@ -58,7 +58,7 @@ Pythonクライアントはユーザーの取り違えを防ぐため、各検�
 
 HTTP 200だけで成功とせず、JSON-RPCのエラーも判別します。結果は`results/regular-日時.json`と`results/vip-日時.json`に保存します。想定外の通信・認証エラーは成功扱いしません。Request Interceptorの応答は、Gatewayの`transformedGatewayResponse`契約を使います。[AWSのInterceptor入出力仕様](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-interceptors-types.html)
 
-LambdaのCloudWatch Logsには商品条件の判定、Runtimeのログには`demo_reservation_accepted`を出します。認証トークンやイベント全体はログに出しません。48の検証にTransaction Searchの設定は不要です。
+LambdaのCloudWatch Logsには商品条件の判定、Runtimeのログには`demo_reservation_accepted`を出します。認証トークンやイベント全体はログに出しません。この節の検証にTransaction Searchの設定は不要です。
 
 ## Codex / Claude Code
 
