@@ -1,0 +1,4 @@
+tenant_id = "YOUR_TENANT_GUID"
+api_client_id = "YOUR_API_CLIENT_GUID"
+local_client_id = "YOUR_PUBLIC_CLIENT_GUID"
+secret_name = "demo/entra-graph-obo/entra-api"

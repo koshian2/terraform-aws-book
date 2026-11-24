@@ -1,0 +1,9 @@
+[project]
+name = "agentcore-infisical"
+version = "0.1.0"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+  "boto3>=1.43.100,<2",
+  "mcp>=1.30.0,<2",
+  "httpx>=0.28,<1",
+]
